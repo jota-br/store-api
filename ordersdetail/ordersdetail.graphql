@@ -1,0 +1,12 @@
+type Query {
+    ordersdetails: [OrderDetail]
+    orderdetail(id: ID!): OrderDetail
+}
+
+type OrderDetail {
+    id: ID!
+    order: Order
+    product: Product
+    quantity: Int!
+    unitPrice: Float!
+}

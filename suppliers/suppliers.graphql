@@ -1,0 +1,12 @@
+type Query {
+    suppliers: [Supplier]
+    supplier(id: ID!): Supplier
+}
+
+type Supplier {
+    id: ID!
+    supplierName: String!
+    contactName: [String]
+    phone: [String]
+    address: String
+}
