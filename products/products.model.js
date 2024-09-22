@@ -46,7 +46,7 @@ async function addNewProduct(data) {
     }
     try {    
         const result = await Product.updateOne({
-            id: newProduct.id,
+            name: newProduct.name,
         }, {
             id: newProduct.id,
             name: newProduct.name,
