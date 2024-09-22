@@ -38,7 +38,7 @@ async function getProductsByName(query) {
 async function addNewProduct(data) {
     const docs = await Product.countDocuments();
     const newProduct = {
-        id: docs,
+        id: Number(docs),
         name: data.name,
         description: data.description,
         price: Number(data.price),

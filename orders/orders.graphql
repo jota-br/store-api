@@ -3,6 +3,10 @@ type Query {
     order(id: ID!): Order
 }
 
+type Mutation {
+    addNewOrder(orderDate: Int!, totalAmount: Float!): Order
+}
+
 type Order {
     id: ID!
     customer: Customer
