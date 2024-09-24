@@ -27,7 +27,7 @@ async function addNewOrder(data) {
     try {
         // Count the number of documents in orders collection
         const docs = await Order.countDocuments();
-        // fetch customer Object ID (MongoDB id)
+        // get customer Object ID (MongoDB id) by id
         const customerIdObj = await Customer.findOne({ id: Number(data.customer) }, { _id: 1 });
 
         // set new order to save
@@ -36,10 +36,10 @@ async function addNewOrder(data) {
             orderDate: (data.orderDate),
             totalAmount: (data.totalAmount),
             customer: customerIdObj,
-        });
+        }).save();
 
         // if new order is saved return
-        if (result.save()) {
+        if (result) {
             // populate new Order with customer data
             return result.populate('customer');
         }

@@ -21,4 +21,4 @@ const categoriesSchema = new Schema({
     }
 });
 
-module.exports = model('category', categoriesSchema);
+module.exports = model('Category', categoriesSchema);

@@ -1,7 +1,7 @@
 const { mongoose } = require('mongoose');
 const { Schema, model } = mongoose;
 
-const productSchema = new Schema({
+const productsSchema = new Schema({
     id: {
         type: Number,
         required: true,
@@ -16,10 +16,8 @@ const productSchema = new Schema({
     },
     reviews: [
         {
-            review: {
-                type: Schema.Types.ObjectId,
-                ref: 'review',
-            }
+            type: Schema.Types.ObjectId,
+            ref: 'Review',
         }
     ],
     price: {
@@ -32,10 +30,8 @@ const productSchema = new Schema({
     },
     categories: [
         {
-            category: {
-                type: Schema.Types.ObjectId,
-                ref: 'category',
-            }
+            type: Schema.Types.ObjectId,
+            ref: 'Category',
         }
     ],
     active: {
@@ -45,4 +41,4 @@ const productSchema = new Schema({
     }
 });
 
-module.exports = model('product', productSchema);
+module.exports = model('Product', productsSchema);

@@ -1,0 +1,8 @@
+type Review {
+    id: ID!
+    customer: Customer
+    product: Product
+    rating: Float!
+    comment: String
+    active: Boolean
+}

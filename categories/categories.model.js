@@ -32,20 +32,16 @@ async function addNewCategory(data) {
         const newCategory = {
             id: Number(docs),
             name: data.name,
-            description: data.description,
+            description: data.description || null,
         }
         // Upsert (new) Category
-        const result = await Category.updateOne({
-            id: newCategory.id,
-        }, {
+        const result = await Category.create({
             id: newCategory.id,
             name: newCategory.name,
-            description: newCategory.description,
-        }, {
-            upsert: true,
+            description: newCategory.description || null,
         });
-        // If acknowledged is true upsert was successful => return
-        if (result.acknowledged === true) {
+        // If new category was created return it's value
+        if (result) {
             return newCategory;
         }
         throw new Error('Something went wrong...');

@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
+const { mongoose } = require('mongoose');
 const { Schema, model } = mongoose;
 
-const ordersSchema = new Schema({
+const reviewsSchema = new Schema({
     id: {
         type: Number,
         required: true,
@@ -9,15 +9,18 @@ const ordersSchema = new Schema({
     customer: {
         type: Schema.Types.ObjectId,
         ref: 'Customer',
-        required: true,
     },
-    orderDate: {
+    product: {
+        type: Schema.Types.ObjectId,
+        ref: 'Product',
+    },
+    rating: {
         type: Number,
         required: true,
     },
-    totalAmount: {
-        type: Number,
-        required: true,
+    comment: {
+        type: String,
+        required: false,
     },
     active: {
         type: Boolean,
@@ -26,4 +29,4 @@ const ordersSchema = new Schema({
     }
 });
 
-module.exports = model('Order', ordersSchema);
+module.exports = model('Review', reviewsSchema);

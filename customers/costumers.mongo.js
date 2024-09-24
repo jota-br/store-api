@@ -33,4 +33,4 @@ const customersSchema = new Schema({
     }
 });
 
-module.exports = model('customer', customersSchema);
+module.exports = model('Customer', customersSchema);
