@@ -36,15 +36,18 @@ async function getProductsByName(query) {
 }
 
 async function addNewProduct(data) {
-    const docs = await Product.countDocuments();
-    const newProduct = {
-        id: Number(docs),
-        name: data.name,
-        description: data.description,
-        price: Number(data.price),
-        stockQuantity: Number(data.stockQuantity),
-    }
     try {    
+        // Count number of products in Product Collection
+        const docs = await Product.countDocuments();
+        // Create new product object
+        const newProduct = {
+            id: Number(docs),
+            name: data.name,
+            description: data.description,
+            price: Number(data.price),
+            stockQuantity: Number(data.stockQuantity),
+        }
+        // Upsert (new) Product
         const result = await Product.updateOne({
             name: newProduct.name,
         }, {
@@ -56,6 +59,7 @@ async function addNewProduct(data) {
         }, {
             upsert: true,
         });
+        // If acknowledged is true upsert was successful => return
         if (result.acknowledged === true) {
             return newProduct;
         }

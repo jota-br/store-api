@@ -3,7 +3,12 @@ type Query {
     customer(id: ID!): Customer
 }
 
+type Mutation {
+    addNewCustomer(firstName: String!, lastName: String!, email: String!, phone: String, address: String): Customer
+}
+
 type Customer {
+    id: ID!
     firstName: String!
     lastName: String!
     email: String!

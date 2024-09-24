@@ -2,19 +2,19 @@ const productsModel = require('./products.model');
 
 module.exports = {
     Query: {
-        products: () => {
-            return productsModel.getAllProducts();
+        products: async () => {
+            return await productsModel.getAllProducts();
         },
-        product: (_, args) => {
-            return productsModel.getProductsById(args.id);
+        product: async (_, args) => {
+            return await productsModel.getProductsById(args.id);
         },
-        getProductsByName: (_, args) => {
-            return productsModel.getProductsByName(args.name);
+        getProductsByName: async (_, args) => {
+            return await productsModel.getProductsByName(args.name);
         }
     },
     Mutation: {
-        addNewProduct: (_, args) => {
-            return productsModel.addNewProduct(args);
+        addNewProduct: async (_, args) => {
+            return await productsModel.addNewProduct(args);
         }
     }
 }

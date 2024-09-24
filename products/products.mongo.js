@@ -18,7 +18,7 @@ const productSchema = new Schema({
         {
             review: {
                 type: Schema.Types.ObjectId,
-                ref: 'Category',
+                ref: 'review',
             }
         }
     ],
@@ -34,7 +34,7 @@ const productSchema = new Schema({
         {
             category: {
                 type: Schema.Types.ObjectId,
-                ref: 'Category',
+                ref: 'category',
             }
         }
     ],

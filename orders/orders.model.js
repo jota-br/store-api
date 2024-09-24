@@ -1,4 +1,5 @@
 const Order = require('./orders.mongo');
+const Customer = require('../customers/costumers.mongo');
 
 async function getAllOrders() {
     try {
@@ -24,19 +25,23 @@ async function getOrdersById(id) {
 
 async function addNewOrder(data) {
     try {
+        // Count the number of documents in orders collection
         const docs = await Order.countDocuments();
-        let newOrder = {
+        // fetch customer Object ID (MongoDB id)
+        const customerIdObj = await Customer.findOne({ id: Number(data.customer) }, { _id: 1 });
+
+        // set new order to save
+        const result = await Order({
             id: Number(docs),
-            orderDate: Number(data.orderDate),
-            totalAmount: Number(data.totalAmount),
-        }
-        const result = await Order.create({
-            id: newOrder.id,
-            orderDate: newOrder.orderDate,
-            totalAmount: newOrder.totalAmount,
+            orderDate: (data.orderDate),
+            totalAmount: (data.totalAmount),
+            customer: customerIdObj,
         });
-        if (result) {
-            return newOrder;
+
+        // if new order is saved return
+        if (result.save()) {
+            // populate new Order with customer data
+            return result.populate('customer');
         }
         throw new Error('Something went wrong....');
     } catch (err) {

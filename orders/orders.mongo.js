@@ -8,7 +8,8 @@ const ordersSchema = new Schema({
     },
     customer: {
         type: Schema.Types.ObjectId,
-        ref: 'Customer'
+        ref: 'customer',
+        required: true,
     },
     orderDate: {
         type: Number,

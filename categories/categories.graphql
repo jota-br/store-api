@@ -3,7 +3,12 @@ type Query {
     category(id: ID!): Category
 }
 
+type Mutation {
+    addNewCategory(name: String!, description: String): Category
+}
+
 type Category {
-    categoryName: String!
+    id: ID!
+    name: String!
     description: String
 }
