@@ -1,5 +1,4 @@
 const Product = require('./products.mongo');
-const Category = require('../categories/categories.mongo');
 
 const categoriesModel = require('../categories/categories.model');
 
@@ -47,7 +46,7 @@ async function addNewProduct(data) {
         // get cetegory Object ID (MongoDB id) by name
         for (let name of data.categories) {
             // get category ObjectId -- search by name -- 'i' case insensitive -- return onli _id
-            let category = await Category.findOne({ name: new RegExp(name, 'i') }, { _id: 1 });
+            let category = await categoriesModel.getCategoryByName(name);
             if (!category) {
                 // if category is not found, create a new one
                 category = await categoriesModel.addNewCategory({ name });

@@ -11,8 +11,23 @@ async function getAllCategories() {
 
 async function getCategoryById(id) {
     try {
-        // fetch category with ${id} from DB
+        // get category with ${id} from DB
         const result = await Category.findOne({ id: Number(id) });
+        // if category is found return
+        if (result) {
+            return result;
+        }
+        throw new Error('Something went wrong...');
+    } catch (err) {
+        console.error(err);
+        return err.message;
+    }
+}
+
+async function getCategoryByName(name) {
+    try {
+        // get category with ${name} from DB
+        const result = Category.findOne({ name: new RegExp(name, 'i') }, {});
         // if category is found return
         if (result) {
             return result;
@@ -54,5 +69,6 @@ async function addNewCategory(data) {
 module.exports = {
     getAllCategories,
     getCategoryById,
+    getCategoryByName,
     addNewCategory,
 }
