@@ -1,6 +1,8 @@
 const Order = require('./orders.mongo');
 const Customer = require('../customers/costumers.mongo');
 
+const { getNextId } = require('../idindex/id.index');
+
 async function getAllOrders() {
     try {
         return await Order.find({}, {}).exec();
@@ -26,13 +28,16 @@ async function getOrdersById(id) {
 async function addNewOrder(data) {
     try {
         // Count the number of documents in orders collection
-        const docs = await Order.countDocuments();
+        const idIndex = await getNextId('productId');
         // get customer Object ID (MongoDB id) by id
         const customerIdObj = await Customer.findOne({ id: Number(data.customer) }, { _id: 1 });
+        if (!customerIdObj) {
+            throw new Error('Ivalid Customer ID...');
+        }
 
         // set new order to save
         const result = await Order({
-            id: Number(docs),
+            id: Number(idIndex),
             orderDate: (data.orderDate),
             totalAmount: (data.totalAmount),
             customer: customerIdObj,

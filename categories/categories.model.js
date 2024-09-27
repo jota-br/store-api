@@ -1,5 +1,7 @@
 const Category = require('./categories.mongo');
 
+const { getNextId } = require('../idindex/id.index');
+
 async function getAllCategories() {
     try {
         return await Category.find({}, {}).exec();
@@ -42,22 +44,16 @@ async function getCategoryByName(name) {
 async function addNewCategory(data) {
     try {
         // Count number of documents in Category collection
-        const docs = await Category.countDocuments();
-        // create new category object
-        const newCategory = {
-            id: Number(docs),
+        const idIndex = await getNextId('categoryId');
+        // Create new Category
+        const result = await Category({
+            id: idIndex,
             name: data.name,
             description: data.description || null,
-        }
-        // Upsert (new) Category
-        const result = await Category.create({
-            id: newCategory.id,
-            name: newCategory.name,
-            description: newCategory.description || null,
-        });
+        }).save();
         // If new category was created return it's value
         if (result) {
-            return newCategory;
+            return result;
         }
         throw new Error('Something went wrong...');
     } catch (err) {

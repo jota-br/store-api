@@ -1,7 +1,16 @@
+type Query {
+    reviews: [Review]
+    getReviewsById(id: ID!): Review
+}
+
+type Mutation {
+    addNewReview(customerId: Int!, productId: Int!, rating: Float!, comment: String): Review
+}
+
 type Review {
     id: ID!
-    customer: Customer
-    product: Product
+    customer: Customer!
+    product: Product!
     rating: Float!
     comment: String
     active: Boolean

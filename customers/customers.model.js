@@ -1,5 +1,7 @@
 const Customer = require('./costumers.mongo');
 
+const { getNextId } = require('../idindex/id.index');
+
 async function getAllCustomers() {
     try {
         return await Customer.find({}, {}).exec();
@@ -24,22 +26,14 @@ async function getCustomersById(id) {
 
 async function addNewCustomer(data) {
     try {
-        const docs = await Customer.countDocuments();
-        const newCustomer = {
-            id: Number(docs),
+        const idIndex = await getNextId('customerId');
+        const result = await Customer.create({
+            id: idIndex,
             firstName: data.firstName,
             lastName: data.lastName,
             email: data.email,
             phone: data.phone,
             address: data.address,
-        }
-        const result = await Customer.create({
-            id: newCustomer.id,
-            firstName: newCustomer.firstName,
-            lastName: newCustomer.lastName,
-            email: newCustomer.email,
-            phone: newCustomer.phone,
-            address: newCustomer.address,
         });
         if (result) {
             return result;

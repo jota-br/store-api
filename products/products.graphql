@@ -5,7 +5,7 @@ type Query {
 }
 
 type Mutation {
-  addNewProduct(name: String!, description: String, reviews: String, price: Float!, stockQuantity: Int!, categories: [String], active: Boolean): Product
+  addNewProduct(name: String!, description: String, price: Float!, stockQuantity: Int!, categories: [String], active: Boolean): Product
 }
 
 type Product {
