@@ -5,7 +5,7 @@ const { getNextId } = require('../idindex/id.index');
 
 async function getAllOrders() {
     try {
-        return await Order.find({}, {}).exec();
+        return await Order.find({}, {}).populate('customer').exec();
     } catch (err) {
         console.error(err);
         return err.message;
@@ -16,7 +16,7 @@ async function getOrdersById(id) {
     try {
         const result = await Order.findOne({ id: Number(id) });
         if (result) {
-            return result;
+            return result.populate('customer');
         }
         throw new Error('Something went wrong....');
     } catch (err) {
