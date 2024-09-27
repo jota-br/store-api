@@ -1,17 +1,9 @@
-const mongoose = require('mongoose');
+const { mongoose } = require('mongoose');
 const { Schema, model } = mongoose;
 
-const customersSchema = new Schema({
+const usersSchema = new Schema({
     id: {
         type: Number,
-        required: true,
-    },
-    firstName: {
-        type: String,
-        required: true,
-    },
-    lastName: {
-        type: String,
         required: true,
     },
     email: {
@@ -20,23 +12,27 @@ const customersSchema = new Schema({
         match: /^[\w-]+@([\w-]+\.)+[\w-]{2,4}$/,
         unique: true,
     },
-    phone: {
+    salt: {
         type: String,
         required: true,
     },
-    address: {
+    hash: {
         type: String,
         required: true,
     },
-    active: {
-        type: Boolean,
+    role: {
+        type: String,
         required: true,
-        default: true,
+        default: 'customer',
+    },
+    customer: {
+        type: Schema.Types.ObjectId,
+        ref: 'Customer',
     },
     createdAt: {
         type: Number,
         required: true,
-    }
+    },
 });
 
-module.exports = model('Customer', customersSchema);
+module.exports = model('User', usersSchema);

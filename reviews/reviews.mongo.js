@@ -26,7 +26,11 @@ const reviewsSchema = new Schema({
         type: Boolean,
         required: true,
         default: true,
-    }
+    },
+    createdAt: {
+        type: Number,
+        required: true,
+    },
 });
 
 module.exports = model('Review', reviewsSchema);

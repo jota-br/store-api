@@ -45,10 +45,12 @@ async function startServer() {
 
         server.listen(PORT, () => {
             console.log(`Server listening to port ${PORT}...`);
+            console.log(`https://localhost:${PORT}/graphql`);
         });
 
     } catch (err) {
-        console.error('Error: ', err);
+        console.error(err.message);
+        return { success: false, error: err.message };
     }
 }
 

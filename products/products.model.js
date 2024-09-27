@@ -1,7 +1,9 @@
 const Product = require('./products.mongo');
 
 const categoriesModel = require('../categories/categories.model');
+
 const { getNextId } = require('../idindex/id.index');
+const validations = require('../services/validations');
 
 async function getAllProducts() {
     try {
@@ -10,13 +12,18 @@ async function getAllProducts() {
             .populate('reviews')
             .exec();
     } catch (err) {
-        console.error(err);
-        return err.message;
+        console.error(err.message);
+        return { success: false, error: err.message };
     }
 }
 
 async function getProductsById(id) {
     try {
+        let isValidString = await validations.validateString(id);
+        if (!isValidString) {
+            throw new Error(`Invalid character found...`);
+        }
+
         const result = await Product.findOne({ id: id })
             .populate('categories')
             .populate('reviews')
@@ -24,34 +31,49 @@ async function getProductsById(id) {
         if (result) {
             return result;
         }
+
         throw new Error('Something went wrong....');
     } catch (err) {
-        console.error(err);
-        return err.message;
+        console.error(err.message);
+        return { success: false, error: err.message };
     }
 }
 
 async function getProductsByName(query) {
     try {
-        const products = await Product.find({ name: new RegExp(query.split(' ').join('|'), 'i') })
+        let isValidString = await validations.validateString(query);
+        if (!isValidString) {
+            throw new Error(`Invalid character found...`);
+        }
+
+        const result = await Product.find({ 
+            name: new RegExp(query.split(' ').join('|'), 'i') 
+        })
             .populate('categories')
             .populate('reviews')
             .exec();
-        if (products) {
-            return products;
+        if (result) {
+            return result;
         }
+
         throw new Error('Something went wrong....');
     } catch (err) {
-        console.error(err);
-        return err.message;
+        console.error(err.message);
+        return { success: false, error: err.message };
     }
 }
 
 async function addNewReviewToProduct(data) {
     try {
+        let isValidString = await validations.validateString(data);
+        if (!isValidString) {
+            throw new Error(`Invalid character found...`);
+        }
+
         const result = await Product.findOne(
             { _id: data._id }, { reviews: 1 }
         );
+
         if (result) {
             let arr = [];
             if (result.length > 0) {
@@ -65,21 +87,28 @@ async function addNewReviewToProduct(data) {
             );
             return reviewPush;
         }
+
         throw new Error('Something went wrong...');
     } catch (err) {
-        console.error(err);
-        return err.message;
+        console.error(err.message);
+        return { success: false, error: err.message };
     }
 }
 
 async function addNewProduct(data) {
-    try {    
-        // Count number of products in Product Collection
+    try {
+        let isValidString = await validations.validateString(data);
+        if (!isValidString) {
+            throw new Error(`Invalid character found...`);
+        }
+
+        // Get new unique ID
         const idIndex = await getNextId('productId');
+
         // category object id array
         let arr = [];
         // categoriesMap Promise
-        const categoriesMap = data.categories.map(async (name) => {
+        const categoriesMap = await data.categories.map(async (name) => {
             // get category ObjectId
             let category = await categoriesModel.getCategoryByName(name);
             if (!category) {
@@ -91,6 +120,9 @@ async function addNewProduct(data) {
         });
         // Wait categoriesMap Promise to resolve
         await Promise.all(categoriesMap);
+
+        const date = await validations.getDate();
+
         // Create New Product
         const result = await Product({
             id: idIndex,
@@ -99,7 +131,9 @@ async function addNewProduct(data) {
             price: data.price,
             stockQuantity: data.stockQuantity,
             categories: arr,
+            createdAt: date,
         }).save();
+
         if (result) {
             // populate result
             await result.populate('categories');
@@ -107,10 +141,11 @@ async function addNewProduct(data) {
             // If new product was created return it's value
             return result;
         }
+
         throw new Error('Something went wrong....');
     } catch (err) {
-        console.error(err);
-        return err.message;
+        console.error(err.message);
+        return { success: false, error: err.message };
     }
 }
 

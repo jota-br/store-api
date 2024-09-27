@@ -1,29 +1,29 @@
-const Category = require('./categories.mongo');
+const Supplier = require('./supplier.mongo');
 
 const { getNextId } = require('../idindex/id.index');
 const validations = require('../services/validations');
 
-async function getAllCategories() {
+async function getAllSuppliers() {
     try {
-        return await Category.find({}, {}).exec();
+        return await Supplier.find({}, {}).exec();
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };
     }
 }
 
-async function getCategoryById(id) {
+async function getSuppliersById(id) {
     try {
         let isValidString = await validations.validateString(id);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
-        // get category with ${id} from DB
-        const result = await Category.findOne({ id: Number(id) });
-        // if category is found return
+
+        const result = await Supplier.findOne({ id: id }).exec();
         if (result) {
             return result;
         }
+
         throw new Error('Something went wrong...');
     } catch (err) {
         console.error(err.message);
@@ -31,18 +31,21 @@ async function getCategoryById(id) {
     }
 }
 
-async function getCategoryByName(name) {
+async function getSupplierByName(query) {
     try {
-        let isValidString = await validations.validateString(name);
+        let isValidString = await validations.validateString(query);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
-        // get category with ${name} from DB
-        const result = Category.findOne({ name: new RegExp(name, 'i') }, {});
-        // if category is found return
+
+        const result = await Supplier.find({ 
+            name: new RegExp(query.split(' ').join('|'), 'i') 
+        }).exec();
+
         if (result) {
             return result;
         }
+
         throw new Error('Something went wrong...');
     } catch (err) {
         console.error(err.message);
@@ -50,28 +53,30 @@ async function getCategoryByName(name) {
     }
 }
 
-async function addNewCategory(data) {
+async function addNewSupplier(data) {
     try {
         let isValidString = await validations.validateString(data);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
-        // Count number of documents in Category collection
-        const idIndex = await getNextId('categoryId');
+
+        const idIndex = await getNextId('supplierId');
 
         const date = await validations.getDate();
 
-        // Create new Category
-        const result = await Category({
+        const result = await Supplier({
             id: idIndex,
-            name: data.name,
-            description: data.description || null,
+            supplierName: data.supplierName,
+            contactNames: data.contactNames,
+            phones: data.phones,
+            address: data.address,
             createdAt: date,
         }).save();
-        // If new category was created return it's value
+
         if (result) {
             return result;
         }
+
         throw new Error('Something went wrong...');
     } catch (err) {
         console.error(err.message);
@@ -80,8 +85,8 @@ async function addNewCategory(data) {
 }
 
 module.exports = {
-    getAllCategories,
-    getCategoryById,
-    getCategoryByName,
-    addNewCategory,
+    getAllSuppliers,
+    getSuppliersById,
+    getSupplierByName,
+    addNewSupplier,
 }

@@ -1,6 +1,7 @@
 type Query {
     customers: [Customer]
     customer(id: ID!): Customer
+    getCustomersByEmail(email: String!): Customer
 }
 
 type Mutation {
@@ -14,4 +15,5 @@ type Customer {
     email: String!
     phone: String
     address: String
+    createdAt: Int!
 }

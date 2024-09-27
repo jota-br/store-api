@@ -17,4 +17,5 @@ type Product {
   stockQuantity: Int!
   categories: [Category]
   active: Boolean
+  createdAt: Int!
 }

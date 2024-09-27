@@ -7,10 +7,8 @@ try {
         console.log('No errors. Ready to connect to mongoDB...');
     });
 } catch (err) {
-    console.log({
-        error: `Connection error. Something went wrong... ${err}`
-    });
-    throw Error(err);
+    console.error(err.message);
+    return { success: false, error: err.message };
 }
 
 async function mongoConnect() {
@@ -18,10 +16,8 @@ async function mongoConnect() {
         await mongoose.connect(MONGO_URL, {});
         console.log(`Database connected successfully...`);
     } catch (err) {
-        console.log({
-            error: `Connection unsuccessful...`
-        });
-        throw Error(err);
+        console.error(err.message);
+        return { success: false, error: err.message };
     }
 }
 

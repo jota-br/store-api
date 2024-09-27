@@ -1,0 +1,19 @@
+type Query {
+    users: [User]
+    user(id: ID!): User
+    getUsersByEmail(email: String!): User
+}
+
+type Mutation {
+    addNewUser(email: String!, password: String!): User
+}
+
+type User {
+    id: ID!
+    email: String!
+    salt: String!
+    hash: String!
+    role: String!
+    customer: Customer
+    createdAt: Int!
+}

@@ -1,12 +1,19 @@
 type Query {
     suppliers: [Supplier]
     supplier(id: ID!): Supplier
+    getSuppliersByName(supplierName: String!): Supplier
+}
+
+type Mutation {
+    addNewSupplier(supplierName: String!, contactNames: [String], phones: [String], address: String): Supplier
 }
 
 type Supplier {
     id: ID!
     supplierName: String!
-    contactName: [String]
-    phone: [String]
+    contactNames: [String]
+    phones: [String]
     address: String
+    active: Boolean
+    createdAt: Int!
 }

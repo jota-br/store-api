@@ -19,6 +19,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "helmet": "^7.1.0",
-    "mongoose": "^8.6.3"
+    "luxon": "^3.5.0",
+    "mongoose": "^8.6.3",
+    "randombytes": "^2.1.0"
   }
 }

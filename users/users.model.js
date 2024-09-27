@@ -1,27 +1,36 @@
-const Customer = require('./costumers.mongo');
+const User = require('./users.mongo');
+
+const customersModel = require('../customers/customers.model');
 
 const { getNextId } = require('../idindex/id.index');
 const validations = require('../services/validations');
+const security = require('../services/security.password');
 
-async function getAllCustomers() {
+async function getAllUsers() {
     try {
-        return await Customer.find({}, {}).exec();
+        return await User.find({}, {})
+            .populate('customer')
+            .exec();
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };
     }
 }
 
-async function getCustomersById(id) {
+async function getUsersById(id) {
     try {
         let isValidString = await validations.validateString(id);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
-        const result = await Customer.findOne({ id: Number(id) });
+
+        const result = await User.findOne({ id: id })
+            .populate('customer')
+            .exec();
         if (result) {
             return result;
         }
+
         throw new Error('Something went wrong...');
     } catch (err) {
         console.error(err.message);
@@ -29,15 +38,17 @@ async function getCustomersById(id) {
     }
 }
 
-async function getCustomersByEmail(email) {
+async function getUsersByEmail(query) {
     try {
-        let isValidEmail = await validations.validateEmail(email);
-        if (!isValidEmail) {
-            throw new Error(`Email ${data.email} is invalid. Valid email format example@example.com....`);
+        let isValidString = await validations.validateString(query);
+        if (!isValidString) {
+            throw new Error(`Invalid character found...`);
         }
 
-        const result = Customer.findOne({ email: email }, {}).exec();
+        const result = await User.findOne({ email: query })
+            .exec();
         if (result) {
+            result.populate('customer');
             return result;
         }
 
@@ -48,13 +59,12 @@ async function getCustomersByEmail(email) {
     }
 }
 
-async function addNewCustomer(data) {
+async function addNewUser(data) {
     try {
         let isValidString = await validations.validateString(data);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
-        const idIndex = await getNextId('customerId');
 
         // Validate email
         const isValidEmail = await validations.validateEmail(data.email);
@@ -63,23 +73,34 @@ async function addNewCustomer(data) {
             throw new Error(`Email ${data.email} is invalid. Valid email format example@example.com....`);
         }
 
-        const emailExists = await getCustomersByEmail(data.email);
-        if (emailExists) {
+        const emailExists = await getUsersByEmail(data.email);
+        if (emailExists.email) {
             throw new Error(`Email ${data.email} already in use...`);
         }
 
+        let objectId = '';
+        const customerObjectId = await customersModel.getCustomersByEmail(data.email);
+        if (customerObjectId) {
+            objectId = customerObjectId;
+        }
+
+        const idIndex = await getNextId('userId');
+
         const date = await validations.getDate();
 
-        const result = await Customer.create({
+        const { hash, salt } = await security.hashPassword(data.password);
+
+        const result = await User({
             id: idIndex,
-            firstName: data.firstName,
-            lastName: data.lastName,
             email: data.email,
-            phone: data.phone,
-            address: data.address,
+            salt: salt,
+            hash: hash,
+            customer: null,
             createdAt: date,
-        });
+        }).save();
+
         if (result) {
+            await result.populate('customer');
             return result;
         }
 
@@ -91,8 +112,8 @@ async function addNewCustomer(data) {
 }
 
 module.exports = {
-    getAllCustomers,
-    getCustomersById,
-    getCustomersByEmail,
-    addNewCustomer,
+    getAllUsers,
+    getUsersById,
+    getUsersByEmail,
+    addNewUser,
 }

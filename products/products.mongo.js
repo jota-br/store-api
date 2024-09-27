@@ -38,6 +38,10 @@ const productsSchema = new Schema({
         type: Boolean,
         required: true,
         default: true,
+    },
+    createdAt: {
+        type: Number,
+        required: true,
     }
 });
 

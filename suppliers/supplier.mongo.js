@@ -1,16 +1,28 @@
 const { mongoose } = require('mongoose');
 const { Schema, model } = mongoose;
 
-const categoriesSchema = new Schema({
+const suppliersSchema = new Schema({
     id: {
         type: Number,
         required: true,
     },
-    name: { 
+    supplierName: {
         type: String,
         required: true,
     },
-    description: {
+    contactNames: [
+        {
+            type: String,
+            required: false,
+        }
+    ],
+    phones: [
+        {
+            type: String,
+            required: false
+        }
+    ],
+    address: {
         type: String,
         required: false,
     },
@@ -22,7 +34,7 @@ const categoriesSchema = new Schema({
     createdAt: {
         type: Number,
         required: true,
-    }
+    },
 });
 
-module.exports = model('Category', categoriesSchema);
+module.exports = model('Supplier', suppliersSchema);
