@@ -15,6 +15,9 @@ module.exports = {
     Mutation: {
         addNewProduct: async (_, args) => {
             return await productsModel.addNewProduct(args);
+        },
+        addNewCategoryToProduct: async (_, args) => {
+            return await productsModel.addNewCategoryToProduct(args);
         }
     }
 }

@@ -24,29 +24,29 @@ async function getSuppliersById(id) {
             return result;
         }
 
-        throw new Error('Something went wrong...');
+        throw new Error(`Couldn\'t return supplier with id: ${id}`);
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };
     }
 }
 
-async function getSupplierByName(query) {
+async function getSupplierByName(name) {
     try {
-        let isValidString = await validations.validateString(query);
+        let isValidString = await validations.validateString(name);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
 
         const result = await Supplier.find({ 
-            name: new RegExp(query.split(' ').join('|'), 'i') 
+            name: new RegExp(name.split(' ').join('|'), 'i') 
         }).exec();
 
         if (result) {
             return result;
         }
 
-        throw new Error('Something went wrong...');
+        throw new Error(`Couldn\'t return supplier with name: ${name}`);
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };
@@ -77,7 +77,7 @@ async function addNewSupplier(data) {
             return result;
         }
 
-        throw new Error('Something went wrong...');
+        throw new Error('Couldn\'t create new supplier...');
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };

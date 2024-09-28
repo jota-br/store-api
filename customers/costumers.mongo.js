@@ -8,11 +8,11 @@ const customersSchema = new Schema({
     },
     firstName: {
         type: String,
-        required: true,
+        required: false,
     },
     lastName: {
         type: String,
-        required: true,
+        required: false,
     },
     email: {
         type: String,
@@ -22,11 +22,11 @@ const customersSchema = new Schema({
     },
     phone: {
         type: String,
-        required: true,
+        required: false,
     },
     address: {
         type: String,
-        required: true,
+        required: false,
     },
     active: {
         type: Boolean,

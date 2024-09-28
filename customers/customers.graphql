@@ -5,13 +5,13 @@ type Query {
 }
 
 type Mutation {
-    addNewCustomer(firstName: String!, lastName: String!, email: String!, phone: String, address: String): Customer
+    addNewCustomer(firstName: String, lastName: String, email: String!, phone: String, address: String): Customer
 }
 
 type Customer {
     id: ID!
-    firstName: String!
-    lastName: String!
+    firstName: String
+    lastName: String
     email: String!
     phone: String
     address: String

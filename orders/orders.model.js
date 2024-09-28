@@ -28,7 +28,7 @@ async function getOrdersById(id) {
             return result.populate('customer');
         }
 
-        throw new Error('Something went wrong....');
+        throw new Error(`Couldn\'t return order with id: ${id}`);
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };
@@ -42,9 +42,6 @@ async function addNewOrder(data) {
             throw new Error(`Invalid character found...`);
         }
 
-        // Get unique ID
-        const idIndex = await getNextId('orderId');
-
         // get customer Object ID
         const customerObject = await customersModel.getCustomersById(data.customer);
         if (!customerObject) {
@@ -56,7 +53,9 @@ async function addNewOrder(data) {
         if (!productObject) {
             throw new Error('Invalid Product ID...');
         }
-
+        
+        // Get unique ID
+        const idIndex = await getNextId('orderId');
         const date = await validations.getDate();
 
         // set new order to save
@@ -78,7 +77,7 @@ async function addNewOrder(data) {
             await result.populate('product');
             return result;
         }
-        throw new Error('Something went wrong....');
+        throw new Error('Couldn\'t create new order...');
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };

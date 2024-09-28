@@ -19,40 +19,45 @@ async function getAllUsers() {
 
 async function getUsersById(id) {
     try {
+        // Search id for invalid characters ($)
         let isValidString = await validations.validateString(id);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
 
+        // fetch User with ${id} and populate User with Customer data
         const result = await User.findOne({ id: id })
             .populate('customer')
             .exec();
+
+        // If User was found return the result
         if (result) {
             return result;
         }
 
-        throw new Error('Something went wrong...');
+        throw new Error(`Couldn\'t return user with id: ${id}`);
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };
     }
 }
 
-async function getUsersByEmail(query) {
+async function getUsersByEmail(email) {
     try {
-        let isValidString = await validations.validateString(query);
+        // Search email for invalid characters ($)
+        let isValidString = await validations.validateString(email);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
 
-        const result = await User.findOne({ email: query })
+        const result = await User.findOne({ email: email })
             .exec();
         if (result) {
             result.populate('customer');
             return result;
         }
 
-        throw new Error('Something went wrong...');
+        throw new Error(`Couldn\'t return user with email: ${email}`);
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };
@@ -68,9 +73,8 @@ async function addNewUser(data) {
 
         // Validate email
         const isValidEmail = await validations.validateEmail(data.email);
-        // If email is invalid new Error is Throw
         if (!isValidEmail) {
-            throw new Error(`Email ${data.email} is invalid. Valid email format example@example.com....`);
+            throw new Error(`Email ${data.email} is invalid. Valid email format: example@example.com....`);
         }
 
         const emailExists = await getUsersByEmail(data.email);
@@ -78,14 +82,18 @@ async function addNewUser(data) {
             throw new Error(`Email ${data.email} already in use...`);
         }
 
-        let objectId = '';
+        const customerResult = await customersModel.addNewCustomer(data);
+        if (customerResult.success) {
+            throw new Error('Error: ', customerResult.error);
+        }
+
+        let objectId = null;
         const customerObjectId = await customersModel.getCustomersByEmail(data.email);
         if (customerObjectId) {
             objectId = customerObjectId;
         }
 
         const idIndex = await getNextId('userId');
-
         const date = await validations.getDate();
 
         const { hash, salt } = await security.hashPassword(data.password);
@@ -95,7 +103,7 @@ async function addNewUser(data) {
             email: data.email,
             salt: salt,
             hash: hash,
-            customer: null,
+            customer: objectId,
             createdAt: date,
         }).save();
 
@@ -104,7 +112,7 @@ async function addNewUser(data) {
             return result;
         }
 
-        throw new Error('Something went wrong...');
+        throw new Error('Couldn\'t create new user...');
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };

@@ -22,7 +22,7 @@ async function getCustomersById(id) {
         if (result) {
             return result;
         }
-        throw new Error('Something went wrong...');
+        throw new Error(`Couldn\'t return customer with id: ${id}`);
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };
@@ -41,7 +41,7 @@ async function getCustomersByEmail(email) {
             return result;
         }
 
-        throw new Error('Something went wrong...');
+        throw new Error(`Couldn\'t return customer with email: ${email}`);
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };
@@ -54,7 +54,6 @@ async function addNewCustomer(data) {
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
-        const idIndex = await getNextId('customerId');
 
         // Validate email
         const isValidEmail = await validations.validateEmail(data.email);
@@ -68,22 +67,23 @@ async function addNewCustomer(data) {
             throw new Error(`Email ${data.email} already in use...`);
         }
 
+        const idIndex = await getNextId('customerId');
         const date = await validations.getDate();
 
-        const result = await Customer.create({
+        const result = await Customer({
             id: idIndex,
-            firstName: data.firstName,
-            lastName: data.lastName,
+            firstName: data.firstName || null,
+            lastName: data.lastName || null,
             email: data.email,
-            phone: data.phone,
-            address: data.address,
+            phone: data.phone || null,
+            address: data.address || null,
             createdAt: date,
-        });
+        }).save();
         if (result) {
             return result;
         }
 
-        throw new Error('Something went wrong...');
+        throw new Error('Couldn\'t create new customer...');
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };

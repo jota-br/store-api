@@ -35,7 +35,7 @@ async function getReviewsById(id) {
             return result;
         }
 
-        throw new Error('Something went wrong...');
+        throw new Error(`Couldn\'t return review with id: ${id}`);
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };
@@ -61,21 +61,34 @@ async function addNewReview(data) {
             throw new Error('Invalid Product ID...');
         }
 
-        // Count number of reviews in Review collaction
-        const idIndex = await getNextId('reviewId');
+        const hasDateAndId = await Review.findOne(
+            { customer: customerObjectId._id, product: productObjectId._id }, { id: 1, createdAt: 1 }
+        ).exec();
 
-        const date = await validations.getDate();
+        let idIndex;
+        let date;
+        if (!hasDateAndId) {
+            idIndex = await getNextId('reviewId');
+            date = await validations.getDate();
+        } else {
+            idIndex = hasDateAndId.id;
+            date = hasDateAndId.createdAt;
+        }
 
-        const result = await Review({
-            id: idIndex,
-            comment: data.comment || null,
-            rating: data.rating,
-            customer: customerObjectId._id,
-            product: productObjectId._id,
-            createdAt: date,
-        }).save();
+        const result = await Review.updateOne(
+            { customer: customerObjectId._id, product: productObjectId._id },
+            {
+                id: idIndex,
+                comment: data.comment || null,
+                rating: data.rating,
+                customer: customerObjectId._id,
+                product: productObjectId._id,
+                createdAt: date,
+            },
+            { upsert: true },
+        );
 
-        if (result) {
+        if (result.acknowledged === true) {
             // update Product with new review id
             let ProductWithReview = {
                 _id: productObjectId._id,
@@ -84,13 +97,15 @@ async function addNewReview(data) {
 
             const productReview = await productsModel.addNewReviewToProduct(ProductWithReview);
             if (productReview) {
-                await result.populate('customer');
-                await result.populate('product');
-                return result;
+                const updatedReview = await Review.findOne({ customer: customerObjectId._id, product: productObjectId._id }, {})
+                    .populate('customer')
+                    .populate('product')
+                    .exec();
+                return updatedReview;
             }
         }
 
-        throw new Error('Somenthing went wrong...');
+        throw new Error('Couldn\'t create new review...');
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };

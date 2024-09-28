@@ -24,7 +24,7 @@ async function getCategoryById(id) {
         if (result) {
             return result;
         }
-        throw new Error('Something went wrong...');
+        throw new Error(`Couldn\'t return category with id: ${id}`);
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };
@@ -43,7 +43,7 @@ async function getCategoryByName(name) {
         if (result) {
             return result;
         }
-        throw new Error('Something went wrong...');
+        throw new Error(`Couldn\'t return category with name: ${name}`);
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };
@@ -58,7 +58,6 @@ async function addNewCategory(data) {
         }
         // Count number of documents in Category collection
         const idIndex = await getNextId('categoryId');
-
         const date = await validations.getDate();
 
         // Create new Category
@@ -72,7 +71,8 @@ async function addNewCategory(data) {
         if (result) {
             return result;
         }
-        throw new Error('Something went wrong...');
+        
+        throw new Error('Couldn\'t create new category...');
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };

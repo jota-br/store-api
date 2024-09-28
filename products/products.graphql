@@ -6,6 +6,7 @@ type Query {
 
 type Mutation {
   addNewProduct(name: String!, description: String, price: Float!, stockQuantity: Int!, categories: [String], active: Boolean): Product
+  addNewCategoryToProduct(id: ID!, categories: [String]!): Product
 }
 
 type Product {
