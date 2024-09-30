@@ -46,8 +46,8 @@ async function getProductsByName(name) {
             throw new Error(`Invalid character found...`);
         }
 
-        const result = await Product.find({ 
-            name: new RegExp(name.split(' ').join('|'), 'i') 
+        const result = await Product.find({
+            name: new RegExp(name.split(' ').join('|'), 'i')
         })
             .populate('categories')
             .populate('reviews')
@@ -196,6 +196,96 @@ async function addNewProduct(data) {
     }
 }
 
+async function updateProductById(data) {
+    try {
+        let isValidString = await validations.validateString(data);
+        if (!isValidString) {
+            throw new Error(`Invalid character found...`);
+        }
+
+        let fetchData = await Product.findOne(
+            { id: data.id },
+            {}
+        ).populate('categories').exec();
+
+        let arr = [];
+        // category object id array
+        if (fetchData.categories) {
+            arr = [...fetchData.categories];
+        }
+
+        let comparingArr = [];
+        await Promise.all(
+            fetchData.categories.map(async (item) => {
+                comparingArr.push(item.name);
+            })
+        );
+
+        if (data.categories) {
+            // categoriesMap Promise
+            const categoriesMap = await data.categories.map(async (name) => {
+                // get category ObjectId
+                if (!comparingArr.includes(name)) {
+                    console.log(name);
+                    let category = await categoriesModel.getCategoryByName(name);
+                    if (!category) {
+                        // if category is not found, create a new one
+                        category = await categoriesModel.addNewCategory({ name });
+                    }
+                    // push ObjectId to array
+                    arr.push(category._id);
+                }
+            });
+            // Wait categoriesMap Promise to resolve
+            await Promise.all(categoriesMap);
+        }
+
+        let dataToUse = {
+            id: data.id,
+            name: (data.name) ? data.name : fetchData.name,
+            description: (data.description) ? data.description : fetchData.description,
+            price: (data.price) ? data.price : fetchData.price,
+            stockQuantity: (data.stockQuantity) ? data.stockQuantity : fetchData.stockQuantity,
+            categories: arr,
+            createdAt: fetchData.createdAt,
+            updatedAt: await validations.getDate(),
+        };
+
+        // Create New Product
+        const result = await Product.updateOne(
+            { id: dataToUse.id },
+            {
+                id: dataToUse.id,
+                name: dataToUse.name,
+                description: dataToUse.description,
+                price: dataToUse.price,
+                stockQuantity: dataToUse.stockQuantity,
+                categories: dataToUse.categories,
+                createdAt: dataToUse.createdAt,
+                updatedAt: dataToUse.updatedAt,
+            },
+            { upsert: false },
+        );
+
+        if (result.acknowledged === true) {
+            const updatedResult = await Product.findOne(
+                { id: dataToUse.id },
+                {}
+            ).exec();
+            // populate result
+            await updatedResult.populate('categories');
+            await updatedResult.populate('reviews');
+            // If new product was created return it's value
+            return updatedResult;
+        }
+
+        throw new Error('Couldn\'t create new product...');
+    } catch (err) {
+        console.error(err.message);
+        return { success: false, error: err.message };
+    }
+}
+
 module.exports = {
     getAllProducts,
     getProductsById,
@@ -203,4 +293,5 @@ module.exports = {
     addNewReviewToProduct,
     addNewCategoryToProduct,
     addNewProduct,
+    updateProductById,
 }

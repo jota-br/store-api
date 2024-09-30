@@ -38,7 +38,7 @@ async function getCategoryByName(name) {
             throw new Error(`Invalid character found...`);
         }
         // get category with ${name} from DB
-        const result = Category.findOne({ name: new RegExp(name, 'i') }, {});
+        const result = Category.findOne({ name: new RegExp(`^${name}^`, 'i') }, {});
         // if category is found return
         if (result) {
             return result;
@@ -60,19 +60,21 @@ async function addNewCategory(data) {
         const idIndex = await getNextId('categoryId');
         const date = await validations.getDate();
 
-        // Create new Category
-        const result = await Category({
-            id: idIndex,
-            name: data.name,
-            description: data.description || null,
-            createdAt: date,
-        }).save();
-        // If new category was created return it's value
-        if (result) {
-            return result;
+        let category = await getCategoryByName(data.name);
+        if (!category) {
+            const result = await Category({
+                id: idIndex,
+                name: data.name,
+                description: data.description || null,
+                createdAt: date,
+            }).save();
+            // If new category was created return it's value
+            if (result) {
+                return result;
+            }
+            throw new Error('Couldn\'t create new category...');
         }
-        
-        throw new Error('Couldn\'t create new category...');
+        throw new Error(`Category with name: ${data.name} already exists...`);
     } catch (err) {
         console.error(err.message);
         return { success: false, error: err.message };

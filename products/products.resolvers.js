@@ -18,6 +18,9 @@ module.exports = {
         },
         addNewCategoryToProduct: async (_, args) => {
             return await productsModel.addNewCategoryToProduct(args);
+        },
+        updateProductById: async (_, args) => {
+            return await productsModel.updateProductById(args);
         }
     }
 }

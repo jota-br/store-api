@@ -42,6 +42,10 @@ const productsSchema = new Schema({
     createdAt: {
         type: Number,
         required: true,
+    },
+    updatedAt: {
+        type: Number,
+        required: false,
     }
 });
 
