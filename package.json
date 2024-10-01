@@ -1,6 +1,6 @@
 {
   "name": "store-api",
-  "version": "0.7.12",
+  "version": "0.7.13",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -8,7 +8,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "description": "",
   "dependencies": {
     "@apollo/server": "^4.11.0",
@@ -21,6 +21,7 @@
     "helmet": "^7.1.0",
     "luxon": "^3.5.0",
     "mongoose": "^8.6.3",
+    "morgan": "^1.10.0",
     "randombytes": "^2.1.0"
   }
 }

@@ -2,6 +2,7 @@ const cors = require('cors');
 // const helmet = require('helmet');
 const express = require('express');
 const cookieSession = require('cookie-session');
+const morgan = require('morgan');
 
 require('dotenv').config();
 
@@ -14,11 +15,12 @@ var corsOptions = {
     origin: '*',
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
-
+let i = 0;
 const app = express();
 // app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use(morgan('short'));
 app.use(cookieSession({
     name: 'session',
     maxAge: 24 * 60 * 60 * 1000,
