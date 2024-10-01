@@ -8,6 +8,7 @@ type Mutation {
   addNewProduct(name: String!, description: String, price: Float!, stockQuantity: Int!, categories: [String], active: Boolean): Product
   addNewCategoryToProduct(id: ID!, categories: [String]!): Product
   updateProductById(id: ID!, name: String, description: String, price: Float, stockQuantity: Int, categories: [String], active: Boolean): Product
+  activateDeactivateProductById(id: ID!): Product
 }
 
 type Product {

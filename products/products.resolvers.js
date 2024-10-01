@@ -21,6 +21,9 @@ module.exports = {
         },
         updateProductById: async (_, args) => {
             return await productsModel.updateProductById(args);
+        },
+        activateDeactivateProductById: async (_, args) => {
+            return await productsModel.activateDeactivateProductById(args.id);
         }
     }
 }

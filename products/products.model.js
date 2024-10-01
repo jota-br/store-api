@@ -216,28 +216,29 @@ async function updateProductById(data) {
 
         let comparingArr = [];
         await Promise.all(
-            fetchData.categories.map(async (item) => {
+            await fetchData.categories.map(async (item) => {
                 comparingArr.push(item.name);
             })
         );
 
         if (data.categories) {
-            // categoriesMap Promise
-            const categoriesMap = await data.categories.map(async (name) => {
-                // get category ObjectId
-                if (!comparingArr.includes(name)) {
-                    console.log(name);
-                    let category = await categoriesModel.getCategoryByName(name);
-                    if (!category) {
-                        // if category is not found, create a new one
-                        category = await categoriesModel.addNewCategory({ name });
-                    }
-                    // push ObjectId to array
-                    arr.push(category._id);
-                }
-            });
             // Wait categoriesMap Promise to resolve
-            await Promise.all(categoriesMap);
+            await Promise.all(
+                // categoriesMap Promise
+                await data.categories.map(async (name) => {
+                    // get category ObjectId
+                    if (!comparingArr.includes(name)) {
+                        console.log(name);
+                        let category = await categoriesModel.getCategoryByName(name);
+                        if (!category) {
+                            // if category is not found, create a new one
+                            category = await categoriesModel.addNewCategory({ name });
+                        }
+                        // push ObjectId to array
+                        arr.push(category._id);
+                    }
+                })
+            );
         }
 
         let dataToUse = {
@@ -286,6 +287,40 @@ async function updateProductById(data) {
     }
 }
 
+async function activateDeactivateProductById(id) {
+    try {
+        let isValidString = await validations.validateString(id);
+        if (!isValidString) {
+            throw new Error(`Invalid character found...`);
+        }
+    
+        const findProduct = await Product.findOne({ id: id }, { active: 1 }).exec();
+        if (findProduct) {
+            const date = await validations.getDate();
+            const result = await Product.updateOne(
+                { id: id }, 
+                { 
+                    active: (findProduct.active) ? false : true, 
+                    updatedAt: date 
+                }, 
+                { upsert: true }
+            );
+            if (result.acknowledged === true) {
+                const updatedResult = await Product.findOne({ id: id }, {})
+                    .populate('categories')
+                    .populate('reviews')
+                    .exec();
+                return updatedResult;
+            }
+            throw new Error(`Couldn\'t ${(findProduct.active) ? 'deactivate' : 'activate'} product with id: ${id}...`);
+        }
+        throw new Error(`Couldn\'t find product with id: ${id}...`);
+    } catch (err) {
+        console.error(err.message);
+        return { success: false, error: err.message };
+    }
+}
+
 module.exports = {
     getAllProducts,
     getProductsById,
@@ -294,4 +329,5 @@ module.exports = {
     addNewCategoryToProduct,
     addNewProduct,
     updateProductById,
+    activateDeactivateProductById,
 }
