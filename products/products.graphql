@@ -5,10 +5,22 @@ type Query {
 }
 
 type Mutation {
-  addNewProduct(name: String!, description: String, price: Float!, stockQuantity: Int!, categories: [String], active: Boolean): Product
-  addNewCategoryToProduct(id: ID!, categories: [String]!): Product
-  updateProductById(id: ID!, name: String, description: String, price: Float, stockQuantity: Int, categories: [String], active: Boolean): Product
-  activateDeactivateProductById(id: ID!): Product
+  addNewProduct(name: String!, description: String, price: Float!, stockQuantity: Int!, categories: [String], active: Boolean): mutationResponse
+  addNewCategoryToProduct(id: ID!, categories: [String]!): mutationResponse
+  updateProductById(id: ID!, name: String, description: String, price: Float, stockQuantity: Int, categories: [String], active: Boolean): mutationResponse
+  activateDeactivateProductById(id: ID!): mutationResponse
+  deleteProductById(id: ID!): mutationDeleteResponse
+}
+
+type mutationResponse {
+  success: Boolean!
+  message: String!
+  body: Product!
+}
+
+type mutationDeleteResponse {
+  success: Boolean!
+  message: String!
 }
 
 type Product {

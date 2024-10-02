@@ -13,7 +13,7 @@ async function getAllProducts() {
             .exec();
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message };
     }
 }
 
@@ -21,7 +21,7 @@ async function getProductsById(id) {
     try {
         let isValidString = await validations.validateString(id);
         if (!isValidString) {
-            throw new Error(`Invalid character found...`);
+            throw new Error(`Invalid input...`);
         }
 
         const result = await Product.findOne({ id: id })
@@ -35,7 +35,7 @@ async function getProductsById(id) {
         throw new Error(`Couldn\'t return product with id: ${id}`);
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message };
     }
 }
 
@@ -43,7 +43,7 @@ async function getProductsByName(name) {
     try {
         let isValidString = await validations.validateString(name);
         if (!isValidString) {
-            throw new Error(`Invalid character found...`);
+            throw new Error(`Invalid input...`);
         }
 
         const result = await Product.find({
@@ -59,87 +59,91 @@ async function getProductsByName(name) {
         throw new Error(`Couldn\'t return product with name: ${name}`);
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message };
     }
 }
 
+// Used by Review Model
 async function addNewReviewToProduct(data) {
     try {
         let isValidString = await validations.validateString(data);
         if (!isValidString) {
-            throw new Error(`Invalid character found...`);
+            throw new Error(`Invalid input...`);
         }
 
-        result = await Product.findOne(
+        const productExists = await Product.findOne(
             { _id: data._id }, { reviews: 1 }
         );
 
-        if (result) {
+        if (productExists) {
             let arr = [];
-            if (result.length > 0) {
-                arr = [...result];
+            if (productExists.length > 0) {
+                arr = [...productExists];
             }
             arr.push(data.objectId);
-            const reviewPush = await Product.updateOne(
+            const result = await Product.updateOne(
                 { _id: data._id },
                 { reviews: arr, },
                 { upsert: true, },
             );
-            return reviewPush;
+            if (result.acknowledged === true) {
+                return result;
+            }
         }
 
         throw new Error('Couldn\'t add new review to product...');
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message };
     }
 }
 
 async function addNewCategoryToProduct(data) {
     try {
-        let isValidString = await validations.validateString(data);
+        const isValidString = await validations.validateString(data);
         if (!isValidString) {
-            throw new Error(`Invalid character found...`);
+            throw new Error(`Invalid input...`);
         }
 
-        let result = await Product.findOne({ id: data.id }, { _id: 1 }).exec();
-        if (!result) {
-            throw new Error(`Couldn\'t find product with id: ${data.id}`);
+        const productExists = await Product.findOne({ id: data.id }, { _id: 1 }).exec();
+        if (!productExists) {
+            throw new Error(`Couldn\'t find product with ID ${data.id}...`);
         }
 
         // category object id array
         let arr = [];
-        // categoriesMap Promise
-        const categoriesMap = await data.categories.map(async (name) => {
-            // get category ObjectId
-            let category = await categoriesModel.getCategoryByName(name);
-            if (!category) {
-                // if category is not found, create a new one
-                category = await categoriesModel.addNewCategory({ name });
-            }
-            // push ObjectId to array
-            arr.push(category._id);
-        });
         // Wait categoriesMap Promise to resolve
-        await Promise.all(categoriesMap);
+        await Promise.all(
+            // categoriesMap Promise
+            await data.categories.map(async (name) => {
+                // get category ObjectId
+                let category = await categoriesModel.getCategoryByName(name);
+                if (!category) {
+                    // if category is not found, create a new one
+                    category = await categoriesModel.addNewCategory({ name });
+                }
+                // push ObjectId to array
+                arr.push(category._id);
+            })
+        );
 
-        const categoryPush = await Product.updateOne(
-            { _id: result._id },
+        const result = await Product.updateOne(
+            { _id: productExists._id },
             { categories: arr, },
             { upsert: true, },
         );
 
-        if (categoryPush.acknowledged === true) {
+        if (result.acknowledged === true) {
             const updatedProduct = await Product.findOne({ id: data.id }, {})
                 .populate('categories')
                 .populate('reviews')
                 .exec();
-            return updatedProduct;
+            return { success: true, message: `Categories have been inserted to Product with ID ${data.id}...`, body: updatedProduct };
         }
-        throw new Error('Couldn\'t update product with new categories...');
+        throw new Error(`Couldn\'t insert Categories to Product with ID ${data.id}...`);
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message };
     }
 }
 
@@ -147,24 +151,25 @@ async function addNewProduct(data) {
     try {
         let isValidString = await validations.validateString(data);
         if (!isValidString) {
-            throw new Error(`Invalid character found...`);
+            throw new Error(`Invalid input...`);
         }
 
         // category object id array
         let arr = [];
-        // categoriesMap Promise
-        const categoriesMap = await data.categories.map(async (name) => {
-            // get category ObjectId
-            let category = await categoriesModel.getCategoryByName(name);
-            if (!category) {
-                // if category is not found, create a new one
-                category = await categoriesModel.addNewCategory({ name });
-            }
-            // push ObjectId to array
-            arr.push(category._id);
-        });
         // Wait categoriesMap Promise to resolve
-        await Promise.all(categoriesMap);
+        await Promise.all(
+            // categoriesMap Promise
+            await data.categories.map(async (name) => {
+                // get category ObjectId
+                let category = await categoriesModel.getCategoryByName(name);
+                if (!category) {
+                    // if category is not found, create a new one
+                    category = await categoriesModel.addNewCategory({ name });
+                }
+                // push ObjectId to array
+                arr.push(category._id);
+            })
+        );
 
         // Get new unique ID
         const idIndex = await getNextId('productId');
@@ -182,17 +187,15 @@ async function addNewProduct(data) {
         }).save();
 
         if (result) {
-            // populate result
             await result.populate('categories');
             await result.populate('reviews');
-            // If new product was created return it's value
-            return result;
+            return { success: true, message: `Product ID is ${result.id}...`, body: result };
         }
 
         throw new Error('Couldn\'t create new product...');
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message };
     }
 }
 
@@ -200,7 +203,7 @@ async function updateProductById(data) {
     try {
         let isValidString = await validations.validateString(data);
         if (!isValidString) {
-            throw new Error(`Invalid character found...`);
+            throw new Error(`Invalid input...`);
         }
 
         let fetchData = await Product.findOne(
@@ -272,18 +275,17 @@ async function updateProductById(data) {
             const updatedResult = await Product.findOne(
                 { id: dataToUse.id },
                 {}
-            ).exec();
-            // populate result
-            await updatedResult.populate('categories');
-            await updatedResult.populate('reviews');
-            // If new product was created return it's value
-            return updatedResult;
+            )
+                .populate('categories')
+                .populate('reviews')
+                .exec();
+            return { success: true, message: `Product with ID ${dataToUse.id} was updated...`, body: updatedResult }
         }
 
         throw new Error('Couldn\'t create new product...');
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message };
     }
 }
 
@@ -310,14 +312,41 @@ async function activateDeactivateProductById(id) {
                     .populate('categories')
                     .populate('reviews')
                     .exec();
-                return updatedResult;
+                return { 
+                    success: true, 
+                    message: `Product with ID ${id} was ${(findProduct.active) ? 'deactivated' : 'activated'}`,
+                    body: updatedResult,
+                };
             }
-            throw new Error(`Couldn\'t ${(findProduct.active) ? 'deactivate' : 'activate'} product with id: ${id}...`);
+            throw new Error(`Couldn\'t ${(findProduct.active) ? 'deactivated' : 'activated'} product with ID ${id}...`);
         }
-        throw new Error(`Couldn\'t find product with id: ${id}...`);
+        throw new Error(`Couldn\'t find product with ID ${id}...`);
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message };
+    }
+}
+
+async function deleteProductById(id) {
+    try {
+        let isValidString = await validations.validateString(id);
+        if (!isValidString) {
+            throw new Error(`Invalid character found...`);
+        }
+
+        const fetchData = await Product.findOne({ id: id }, { id: 1 }).exec();
+        if (fetchData) {
+            const result = await Product.deleteOne({ id: id });
+
+            if (result.deletedCount === 1) {
+                return { success: true, message: `Product with ID ${id} was deleted...`, };
+            }
+            throw new Error(`Couldn\'t delete product with ID ${id}...`)
+        }
+        throw new Error(`Product with ID ${id} was not found...`);
+    } catch (err) {
+        console.log(err.message);
+        return { success: false, message: err.message };
     }
 }
 
@@ -330,4 +359,5 @@ module.exports = {
     addNewProduct,
     updateProductById,
     activateDeactivateProductById,
+    deleteProductById,
 }

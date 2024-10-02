@@ -24,6 +24,9 @@ module.exports = {
         },
         activateDeactivateProductById: async (_, args) => {
             return await productsModel.activateDeactivateProductById(args.id);
+        },
+        deleteProductById: async (_, args) => {
+            return await productsModel.deleteProductById(args.id);
         }
     }
 }
