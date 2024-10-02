@@ -31,6 +31,10 @@ const reviewsSchema = new Schema({
         type: Number,
         required: true,
     },
+    flag: {
+        type: String,
+        required: false,
+    },
 });
 
 module.exports = model('Review', reviewsSchema);

@@ -1,4 +1,5 @@
 const Product = require('./products.mongo');
+const Review = require('../reviews/reviews.mongo');
 
 const categoriesModel = require('../categories/categories.model');
 
@@ -211,6 +212,10 @@ async function updateProductById(data) {
             {}
         ).populate('categories').exec();
 
+        if (!fetchData) {
+            throw new Error(`Couldn\'t find Product with id ${data.id}...`);
+        }
+
         let arr = [];
         // category object id array
         if (fetchData.categories) {
@@ -231,7 +236,6 @@ async function updateProductById(data) {
                 await data.categories.map(async (name) => {
                     // get category ObjectId
                     if (!comparingArr.includes(name)) {
-                        console.log(name);
                         let category = await categoriesModel.getCategoryByName(name);
                         if (!category) {
                             // if category is not found, create a new one
@@ -275,17 +279,16 @@ async function updateProductById(data) {
             const updatedResult = await Product.findOne(
                 { id: dataToUse.id },
                 {}
-            )
-                .populate('categories')
-                .populate('reviews')
-                .exec();
+            ).exec();
+            await updatedResult.populate('categories')
+            await updatedResult.populate('reviews')
             return { success: true, message: `Product with ID ${dataToUse.id} was updated...`, body: updatedResult }
         }
 
-        throw new Error('Couldn\'t create new product...');
+        throw new Error(`Couldn\'t update Product with ID ${data.id}...`);
     } catch (err) {
         console.error(err.message);
-        return { success: false, message: err.message };
+        return { success: false, message: err.message, };
     }
 }
 
@@ -334,10 +337,17 @@ async function deleteProductById(id) {
             throw new Error(`Invalid character found...`);
         }
 
-        const fetchData = await Product.findOne({ id: id }, { id: 1 }).exec();
+        let fetchData = await Product.findOne({ id: id }, { id: 1, reviews: 1 }).exec();
         if (fetchData) {
+            await Promise.all(
+                await fetchData.reviews.map(async (reviewId) => {
+                    if (reviewId) {
+                        await Review.deleteOne({ _id: reviewId });
+                    }
+                })
+            );
+            
             const result = await Product.deleteOne({ id: id });
-
             if (result.deletedCount === 1) {
                 return { success: true, message: `Product with ID ${id} was deleted...`, };
             }
@@ -345,7 +355,7 @@ async function deleteProductById(id) {
         }
         throw new Error(`Product with ID ${id} was not found...`);
     } catch (err) {
-        console.log(err.message);
+        console.error(err.message);
         return { success: false, message: err.message };
     }
 }

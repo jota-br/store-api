@@ -89,10 +89,10 @@ async function addNewReview(data) {
         );
 
         if (result.acknowledged === true) {
-            // update Product with new review id
+            const reviewObjectId = await Review.findOne({ id: idIndex }, { _id: 1 }).exec();
             let ProductWithReview = {
                 _id: productObjectId._id,
-                objectId: result._id,
+                objectId: reviewObjectId._id,
             }
 
             const productReview = await productsModel.addNewReviewToProduct(ProductWithReview);

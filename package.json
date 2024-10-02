@@ -1,6 +1,6 @@
 {
   "name": "store-api",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

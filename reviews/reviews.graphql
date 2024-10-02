@@ -15,4 +15,5 @@ type Review {
     comment: String
     active: Boolean
     createdAt: Int!
+    flag: String
 }
