@@ -1,4 +1,4 @@
-.env
-node_modules
+*.env
 *.pem
-postman.test.json
+
+node_modules
