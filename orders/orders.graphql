@@ -1,10 +1,16 @@
 type Query {
-    orders: [Order]
-    order(id: ID!): Order
+    orders: [orderResponse]
+    getOrderById(id: ID!): orderResponse
 }
 
 type Mutation {
-    addNewOrder(customer: Int!, product: Int!, quantity: Int!, orderDate: Int!): Order
+    addNewOrder(customer: Int!, product: Int!, quantity: Int!, orderDate: Int!): orderResponse
+}
+
+type orderResponse {
+    success: Boolean!
+    message: String!
+    body: Order!
 }
 
 type Order {
@@ -16,4 +22,5 @@ type Order {
     totalAmount: Float!
     orderDate: Int!
     createdAt: Int!
+    updatedAt: Int
 }

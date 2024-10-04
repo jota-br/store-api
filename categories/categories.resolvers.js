@@ -5,8 +5,8 @@ module.exports = {
         categories: async () => {
             return await categoriesModel.getAllCategories();
         },
-        category: async (_, args) => {
-            return await categoriesModel.getCategoryById();
+        getCategoryById: async (_, args) => {
+            return await categoriesModel.getCategoryById(args.id);
         }
     },
     Mutation: {

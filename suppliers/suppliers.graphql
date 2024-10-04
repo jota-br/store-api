@@ -1,11 +1,18 @@
 type Query {
-    suppliers: [Supplier]
-    supplier(id: ID!): Supplier
-    getSuppliersByName(supplierName: String!): Supplier
+    suppliers: [supplierResponse]
+    getSupplierById(id: ID!): supplierResponse
+    getSupplierByName(supplierName: String!): supplierResponse
 }
 
 type Mutation {
-    addNewSupplier(supplierName: String!, contactNames: [String], phones: [String], address: String): Supplier
+    addNewSupplier(supplierName: String!, contactNames: [String], phones: [String], address: String): supplierResponse
+    deleteSupplierById(id: ID!): supplierResponse
+}
+
+type supplierResponse {
+    success: Boolean!
+    message: String!
+    body: Supplier!
 }
 
 type Supplier {
@@ -14,6 +21,7 @@ type Supplier {
     contactNames: [String]
     phones: [String]
     address: String
-    active: Boolean
     createdAt: Int!
+    updatedAt: Int!
+    deleted: Boolean
 }

@@ -33,6 +33,15 @@ const usersSchema = new Schema({
         type: Number,
         required: true,
     },
+    updatedAt: {
+        type: Number,
+        required: false,
+    },
+    deleted: {
+        type: Boolean,
+        required: true,
+        default: false,
+    }
 });
 
 module.exports = model('User', usersSchema);

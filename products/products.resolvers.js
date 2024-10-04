@@ -5,11 +5,11 @@ module.exports = {
         products: async () => {
             return await productsModel.getAllProducts();
         },
-        product: async (_, args) => {
-            return await productsModel.getProductsById(args.id);
+        getProductById: async (_, args) => {
+            return await productsModel.getProductById(args.id);
         },
-        getProductsByName: async (_, args) => {
-            return await productsModel.getProductsByName(args.name);
+        getProductByName: async (_, args) => {
+            return await productsModel.getProductByName(args.name);
         }
     },
     Mutation: {
@@ -22,6 +22,7 @@ module.exports = {
         updateProductById: async (_, args) => {
             return await productsModel.updateProductById(args);
         },
+        // Deprecated
         activateDeactivateProductById: async (_, args) => {
             return await productsModel.activateDeactivateProductById(args.id);
         },

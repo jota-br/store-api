@@ -1,5 +1,4 @@
 const Order = require('./orders.mongo');
-const Customer = require('../customers/costumers.mongo');
 
 const productsModel = require('../products/products.model');
 const customersModel = require('../customers/customers.model');
@@ -9,29 +8,45 @@ const validations = require('../services/validations');
 
 async function getAllOrders() {
     try {
-        return await Order.find({}, {}).populate('customer').exec();
+        const result = await Order.find({}, {}).populate('customer').exec();
+        if (result) {
+            return { 
+                success: true, 
+                message: `Fetched all Orders...`,
+                body: result,
+            };
+        }
+        throw new Error(`Couldn\'t find Orders...`);
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message, body: [] };
     }
 }
 
-async function getOrdersById(id) {
+async function getOrderById(id) {
     try {
         let isValidString = await validations.validateString(id);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
 
-        const result = await Order.findOne({ id: Number(id) });
+        const result = await Order.findOne(
+            { id: Number(id) }
+        )
+            .populate('customer')
+            .exec();
         if (result) {
-            return result.populate('customer');
+            return { 
+                success: true, 
+                message: `Order with ID ${id} was found...`,
+                body: result,
+            };
         }
 
-        throw new Error(`Couldn\'t return order with id: ${id}`);
+        throw new Error(`Couldn\'t return Order with ID ${id}`);
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message, body: [] };
     }
 }
 
@@ -43,13 +58,13 @@ async function addNewOrder(data) {
         }
 
         // get customer Object ID
-        const customerObject = await customersModel.getCustomersById(data.customer);
+        const customerObject = await customersModel.getCustomerById(data.customer);
         if (!customerObject) {
             throw new Error('Ivalid Customer ID...');
         }
 
         // get product Object ID
-        const productObject = await productsModel.getProductsById(data.product);
+        const productObject = await productsModel.getProductById(data.product);
         if (!productObject) {
             throw new Error('Invalid Product ID...');
         }
@@ -75,17 +90,21 @@ async function addNewOrder(data) {
             // populate new Order with customer data
             await result.populate('customer');
             await result.populate('product');
-            return result;
+            return { 
+                success: true, 
+                message: `Order with ID ${id} was found...`,
+                body: result,
+            };
         }
         throw new Error('Couldn\'t create new order...');
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message, body: [] };
     }
 }
 
 module.exports = {
     getAllOrders,
-    getOrdersById,
+    getOrderById,
     addNewOrder,
 }

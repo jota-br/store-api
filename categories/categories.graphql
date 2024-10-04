@@ -1,10 +1,16 @@
 type Query {
-    categories: [Category]
-    category(id: ID!): Category
+    categories: categoryResponse
+    getCategoryById(id: ID!): categoryResponse
 }
 
 type Mutation {
-    addNewCategory(name: String!, description: String): Category
+    addNewCategory(name: String!, description: String): categoryResponse
+}
+
+type categoryResponse {
+    success: Boolean!
+    message: String!
+    body: [Category!]!
 }
 
 type Category {
@@ -12,4 +18,6 @@ type Category {
     name: String!
     description: String
     createdAt: Int!
+    updatedAt: Int
+    deleted: Boolean
 }

@@ -8,21 +8,26 @@ const validations = require('../services/validations');
 
 async function getAllReviews() {
     try {
-        return await Review.find({}, {})
+        const result = await Review.find({}, {})
         .populate('customer')
         .populate('product')
         .exec();
+        return { 
+            success: true, 
+            message: `Fetched all reviews...`, 
+            body: result,
+        };
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message, body: [] };
     }
 }
 
-async function getReviewsById(id) {
+async function getReviewById(id) {
     try {
         let isValidString = await validations.validateString(id);
         if (!isValidString) {
-            throw new Error(`Invalid character found...`);
+            throw new Error(`Invalid input...`);
         }
 
         // get review with ${id} and populate customer and product data
@@ -32,13 +37,17 @@ async function getReviewsById(id) {
             .exec();
         // if review is found return it's value
         if (result) {
-            return result;
+            return { 
+                success: true, 
+                message: `Fetched Review with ID ${id}...`, 
+                body: result,
+            };
         }
 
-        throw new Error(`Couldn\'t return review with id: ${id}`);
+        throw new Error(`Couldn\'t return review with ID ${id}`);
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message, body: [] };
     }
 }
 
@@ -46,17 +55,17 @@ async function addNewReview(data) {
     try {
         let isValidString = await validations.validateString(data);
         if (!isValidString) {
-            throw new Error(`Invalid character found...`);
+            throw new Error(`Invalid input...`);
         }
 
         // get customer ObjectId
-        const customerObjectId = await customersModel.getCustomersById(data.customer);
+        const customerObjectId = await customersModel.getCustomerById(data.customer);
         if (!customerObjectId) {
             throw new Error('Invalid Customer ID...');
         }
 
         // get customer ObjectId
-        const productObjectId = await productsModel.getProductsById(data.product);
+        const productObjectId = await productsModel.getProductById(data.product);
         if (!productObjectId) {
             throw new Error('Invalid Product ID...');
         }
@@ -95,25 +104,29 @@ async function addNewReview(data) {
                 objectId: reviewObjectId._id,
             }
 
-            const productReview = await productsModel.addNewReviewToProduct(ProductWithReview);
-            if (productReview) {
-                const updatedReview = await Review.findOne({ customer: customerObjectId._id, product: productObjectId._id }, {})
+            const productResult = await productsModel.addNewReviewToProduct(ProductWithReview);
+            if (productResult) {
+                const updatedResult = await Review.findOne({ customer: customerObjectId._id, product: productObjectId._id }, {})
                     .populate('customer')
                     .populate('product')
                     .exec();
-                return updatedReview;
+                return { 
+                    success: true, 
+                    message: `Review was created...`,
+                    body: updatedResult,
+                };
             }
         }
 
         throw new Error('Couldn\'t create new review...');
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message, body: [] };
     }
 }
 
 module.exports = {
     getAllReviews,
-    getReviewsById,
+    getReviewById,
     addNewReview,
 }

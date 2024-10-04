@@ -5,8 +5,8 @@ module.exports = {
         reviews: async () => {
             return await reviewsModel.getAllReviews();
         },
-        getReviewsById: async (_, args) => {
-            return await reviewsModel.getReviewsById(args.id);
+        getReviewById: async (_, args) => {
+            return await reviewsModel.getReviewById(args.id);
         }
     },
     Mutation: {

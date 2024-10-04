@@ -5,8 +5,8 @@ module.exports = {
         orders: async () => {
             return await ordersModel.getAllOrders();
         },
-        order: async (_, args) => {
-            return await ordersModel.getOrdersById(args.id);
+        getOrderById: async (_, args) => {
+            return await ordersModel.getOrderById(args.id);
         }
     },
     Mutation: {

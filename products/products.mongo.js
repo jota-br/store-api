@@ -34,11 +34,6 @@ const productsSchema = new Schema({
             ref: 'Category',
         }
     ],
-    active: {
-        type: Boolean,
-        required: true,
-        default: true,
-    },
     createdAt: {
         type: Number,
         required: true,
@@ -46,7 +41,12 @@ const productsSchema = new Schema({
     updatedAt: {
         type: Number,
         required: false,
-    }
+    },
+    deleted: {
+        type: Boolean,
+        required: true,
+        default: false,
+    },
 });
 
 module.exports = model('Product', productsSchema);

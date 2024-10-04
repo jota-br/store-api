@@ -1,26 +1,21 @@
 type Query {
-  products: [Product]
-  getProductsByName(name: String!): [Product]
-  product(id: ID!): Product
+  products: [productResponse]
+  getProductByName(name: String!): [productResponse]
+  getProductById(id: ID!): productResponse
 }
 
 type Mutation {
-  addNewProduct(name: String!, description: String, price: Float!, stockQuantity: Int!, categories: [String], active: Boolean): mutationResponse
-  addNewCategoryToProduct(id: ID!, categories: [String]!): mutationResponse
-  updateProductById(id: ID!, name: String, description: String, price: Float, stockQuantity: Int, categories: [String], active: Boolean): mutationResponse
-  activateDeactivateProductById(id: ID!): mutationResponse
-  deleteProductById(id: ID!): mutationDeleteResponse
+  addNewProduct(name: String!, description: String, price: Float!, stockQuantity: Int!, categories: [String]): productResponse
+  addNewCategoryToProduct(id: ID!, categories: [String]!): productResponse
+  updateProductById(id: ID!, name: String, description: String, price: Float, stockQuantity: Int, categories: [String]): productResponse
+  deleteProductById(id: ID!): productResponse
+  activateDeactivateProductById(id: ID!): productResponse
 }
 
-type mutationResponse {
+type productResponse {
   success: Boolean!
   message: String!
   body: Product!
-}
-
-type mutationDeleteResponse {
-  success: Boolean!
-  message: String!
 }
 
 type Product {
@@ -31,7 +26,7 @@ type Product {
   price: Float!
   stockQuantity: Int!
   categories: [Category]
-  active: Boolean
   createdAt: Int!
   updatedAt: Int
+  deleted: Boolean
 }

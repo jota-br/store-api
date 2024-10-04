@@ -1,11 +1,17 @@
 type Query {
-    customers: [Customer]
-    customer(id: ID!): Customer
-    getCustomersByEmail(email: String!): Customer
+    customers: customerResponse
+    getCustomerById(id: ID!): customerResponse
+    getCustomerByEmail(email: String!): customerResponse
 }
 
 type Mutation {
-    addNewCustomer(firstName: String, lastName: String, email: String!, phone: String, address: String): Customer
+    addNewCustomer(firstName: String, lastName: String, email: String!, phone: String, address: String): customerResponse
+}
+
+type customerResponse {
+    success: Boolean!
+    message: String!
+    body: [Customer!]!
 }
 
 type Customer {
@@ -16,4 +22,6 @@ type Customer {
     phone: String
     address: String
     createdAt: Int!
+    updatedAt: Int
+    deleted: Boolean
 }

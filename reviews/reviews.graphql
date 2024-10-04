@@ -1,10 +1,16 @@
 type Query {
-    reviews: [Review]
-    getReviewsById(id: ID!): Review
+    reviews: [reviewResponse]
+    getReviewById(id: ID!): reviewResponse
 }
 
 type Mutation {
-    addNewReview(customer: Int!, product: Int!, rating: Float!, comment: String): Review
+    addNewReview(customer: Int!, product: Int!, rating: Float!, comment: String): reviewResponse
+}
+
+type reviewResponse {
+    success: Boolean!
+    message: String!
+    body: Review!
 }
 
 type Review {
@@ -13,7 +19,6 @@ type Review {
     product: Product!
     rating: Float!
     comment: String
-    active: Boolean
     createdAt: Int!
-    flag: String
+    deleted: Boolean
 }

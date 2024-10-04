@@ -5,10 +5,18 @@ const validations = require('../services/validations');
 
 async function getAllCategories() {
     try {
-        return await Category.find({}, {}).exec();
+        const result = await Category.find({}, {}).exec();
+        if (result) {
+            return {
+                success: true,
+                message: `Fetched all Categories...`,
+                body: result,
+            };
+        }
+        throw new Error(`Couldn\'t find Categories...`);
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message, body: [] };
     }
 }
 
@@ -22,12 +30,16 @@ async function getCategoryById(id) {
         const result = await Category.findOne({ id: Number(id) });
         // if category is found return
         if (result) {
-            return result;
+            return {
+                success: true,
+                message: `Category with ID ${id} found...`,
+                body: [result],
+            };  
         }
-        throw new Error(`Couldn\'t return category with id: ${id}`);
+        throw new Error(`Couldn\'t return category with ID ${id}`);
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message, body: [] };
     }
 }
 
@@ -41,12 +53,16 @@ async function getCategoryByName(name) {
         const result = Category.findOne({ name: new RegExp(`^${name}^`, 'i') }, {});
         // if category is found return
         if (result) {
-            return result;
+            return {
+                success: true,
+                message: `Category with NAME ${name} found...`,
+                body: [result],
+            }; 
         }
-        throw new Error(`Couldn\'t return category with name: ${name}`);
+        throw new Error(`Couldn\'t return category with NAME ${name}`);
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message, body: [] };
     }
 }
 
@@ -61,7 +77,7 @@ async function addNewCategory(data) {
         const date = await validations.getDate();
 
         let category = await getCategoryByName(data.name);
-        if (!category) {
+        if (!category.success) {
             const result = await Category({
                 id: idIndex,
                 name: data.name,
@@ -70,14 +86,18 @@ async function addNewCategory(data) {
             }).save();
             // If new category was created return it's value
             if (result) {
-                return result;
+                return {
+                    success: true,
+                    message: `Category was created...`,
+                    body: [result],
+                }; 
             }
             throw new Error('Couldn\'t create new category...');
         }
-        throw new Error(`Category with name: ${data.name} already exists...`);
+        throw new Error(`Category with NAME ${data.name} already exists...`);
     } catch (err) {
         console.error(err.message);
-        return { success: false, error: err.message };
+        return { success: false, message: err.message, body: [] };
     }
 }
 

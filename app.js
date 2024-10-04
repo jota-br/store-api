@@ -20,7 +20,7 @@ const app = express();
 // app.use(helmet());
 app.use(cors());
 app.use(express.json());
-app.use(morgan('short'));
+// app.use(morgan('short'));
 app.use(cookieSession({
     name: 'session',
     maxAge: 24 * 60 * 60 * 1000,

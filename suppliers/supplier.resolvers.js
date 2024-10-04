@@ -5,16 +5,19 @@ module.exports = {
         suppliers: async () => {
             return await suppliersModel.getAllSuppliers();
         },
-        supplier: async (_, args) => {
-            return await suppliersModel.getSuppliersById(args.id);
+        getSupplierById: async (_, args) => {
+            return await suppliersModel.getSupplierById(args.id);
         },
-        getSuppliersByName: async (_, args) => {
-            return await suppliersModel.getSuppliersByName(args.supplierName);
+        getSupplierByName: async (_, args) => {
+            return await suppliersModel.getSupplierByName(args.supplierName);
         },
     },
     Mutation: {
         addNewSupplier: async (_, args) => {
             return await suppliersModel.addNewSupplier(args);
+        },
+        deleteSupplierById: async (_, args) => {
+            return await suppliersModel.deleteSupplierById(args.id);
         }
     }
 }

@@ -5,11 +5,11 @@ module.exports = {
         customers: async () => {
             return await customersModel.getAllCustomers();
         },
-        customer: async (_, args) => {
-            return await customersModel.getCustomersById(args.id);
+        getCustomerById: async (_, args) => {
+            return await customersModel.getCustomerById(args.id);
         },
-        getCustomersByEmail: async (_, args) => {
-            return await customersModel.getCustomersByEmail(args.email);
+        getCustomerByEmail: async (_, args) => {
+            return await customersModel.getCustomerByEmail(args.email);
         }
     },
     Mutation: {

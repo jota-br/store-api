@@ -2,7 +2,7 @@ const { createHmac } = require('node:crypto');
 var randomBytes = require('randombytes');
 
 async function hashPassword(password, saltKey) {
-    return new Promise((resolve) => {
+    return await new Promise((resolve) => {
         setImmediate(() => {
             const salt = saltKey || Buffer.from(randomBytes(32)).toString('hex');
             const hmac = createHmac('sha512', salt);
@@ -14,12 +14,8 @@ async function hashPassword(password, saltKey) {
 }
 
 async function verifyPassword(password, salt, storedHash) {
-    return new Promise((resolve) => {
-        setImmediate(() => {
-            const result = hashPassword(password, salt);
-            resolve(result === storedHash);
-        });
-    });
+    const result = await hashPassword(password, salt);
+    return (result.hash === storedHash);
 }
 
 module.exports = {

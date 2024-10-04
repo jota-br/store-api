@@ -1,11 +1,25 @@
 type Query {
-    users: [User]
-    user(id: ID!): User
-    getUsersByEmail(email: String!): User
+    users: userResponse
+    getUserById(id: ID!): userResponse
+    getUserByEmail(email: String!): userResponse
 }
 
 type Mutation {
-    addNewUser(email: String!, password: String!): User
+    addNewUser(email: String!, password: String!): userResponse
+    updateUserPasswordById(input: updateUserInput): userResponse
+    deleteUserById(id: ID!): userResponse
+}
+
+type userResponse {
+    success: Boolean!
+    message: String!
+    body: [User!]!
+}
+
+input updateUserInput {
+    id: ID!
+    password: String!
+    newPassword: String!
 }
 
 type User {
@@ -16,4 +30,6 @@ type User {
     role: String!
     customer: Customer
     createdAt: Int!
+    updatedAt: Int
+    deleted: Boolean
 }
