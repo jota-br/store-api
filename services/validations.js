@@ -5,7 +5,7 @@ async function validateString(data) {
         setImmediate(() => {
             let regex = /\$/g;
             let arr = Object.values(data);
-            let matches = arr.filter(value => regex.test(value));
+            let matches = arr.filter(value => typeof value === 'string' && regex.test(value));
             resolve(matches.length === 0);
         });
     });

@@ -51,14 +51,19 @@ async function getOrderById(id) {
     }
 }
 
-async function addNewOrder(data) {
+async function addNewOrder(productsInput, customer) {
     try {
-        let isValidString = await validations.validateString(data);
+        let validate = {
+            order: productsInput,
+            customer: customer,
+        }
+        console.log(validate);
+        let isValidString = await validations.validateString(validate);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
 
-        const customerObject = await Customer.findOne({ id: data.customer }, { _id: 1 });
+        const customerObject = await Customer.findOne({ id: customer }, { _id: 1 });
         if (!customerObject) {
             throw new Error("Ivalid Customer ID...");
         }
@@ -66,21 +71,20 @@ async function addNewOrder(data) {
         let arrProductsId = [];
         let arrProductsQuantity = [];
         let arrProductCurrentStock = [];
-        const products = await new Promise.all(data.map(async (product) => {
-            const productObject = await Product.findOne({ id: product.id }, { _id: 1 });
+
+        const products = await Promise.all(productsInput.map(async (product) => {
+            const productObject = await Product.findOne({ id: product.productId }, { _id: 1, stockQuantity: 1, name: 1, price: 1 });
             if (!productObject) {
                 throw new Error("Invalid Product ID...");
             }
 
-            const hasStock = await Product.findOne({ _id: productObject._id }, { stockQuantity: 1, name: 1 });
-
-            if (hasStock.stockQuantity < product.quantity) {
-                throw new Error(`Insuficient stock for Product ${hasStock.name}...`);
+            if (productObject.stockQuantity < product.quantity) {
+                throw new Error(`Insuficient stock for Product ${productObject.name}...`);
             }
 
             arrProductsId.push(productObject._id);
             arrProductsQuantity.push(product.quantity);
-            arrProductCurrentStock.push(hasStock.stockQuantity);
+            arrProductCurrentStock.push(productObject.stockQuantity);
 
             return {
                 product: productObject._id,
@@ -90,8 +94,8 @@ async function addNewOrder(data) {
             };
         }));
 
-        await new Promise.all(arrProductsId.map(async (productId) => {
-            const index = Array.indexOf(productId);
+        await Promise.all(arrProductsId.map(async (productId) => {
+            const index = arrProductsId.indexOf(productId);
             const stockResult = await Product.updateOne (
                 { _id: productId },
                 { stockQuantity: (arrProductCurrentStock[index] - arrProductsQuantity[index]) }
@@ -119,10 +123,13 @@ async function addNewOrder(data) {
         }
 
         await result.populate("customer");
-        await result.populate("product");
+        await result.populate({
+            path: 'products.product',
+            model: 'Product',
+        });
         return {
             success: true,
-            message: `Order with ID ${id} was found...`,
+            message: `Order with ID ${result.id} was created successfully...`,
             body: [result],
         };
     } catch (err) {
