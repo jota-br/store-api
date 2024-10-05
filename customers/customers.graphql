@@ -1,17 +1,27 @@
-type Query {
-    customers: customerResponse
-    getCustomerById(id: ID!): customerResponse
-    getCustomerByEmail(email: String!): customerResponse
-}
+#type Query {
+    #customers: customerResponse
+    #getCustomerById(id: ID!): customerResponse
+    #getCustomerByEmail(email: String!): customerResponse
+#}
 
 type Mutation {
-    addNewCustomer(firstName: String, lastName: String, email: String!, phone: String, address: String): customerResponse
+    #addNewCustomer(firstName: String, lastName: String, email: String!, phone: String, address: String): customerResponse
+    updateCustomerById(input: updateCustomerInput): customerResponse
 }
 
 type customerResponse {
     success: Boolean!
     message: String!
     body: [Customer!]!
+}
+
+input updateCustomerInput {
+    id: ID!
+    password: String!
+    firstName: String
+    lastName: String
+    phone: String
+    address: String
 }
 
 type Customer {

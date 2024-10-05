@@ -7,7 +7,7 @@ type Query {
 type Mutation {
     addNewUser(email: String!, password: String!): userResponse
     updateUserPasswordById(input: updateUserInput): userResponse
-    deleteUserById(id: ID!): userResponse
+    deleteUserById(id: ID!, password: String!): userResponse
 }
 
 type userResponse {

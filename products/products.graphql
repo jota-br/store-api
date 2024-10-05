@@ -1,21 +1,22 @@
 type Query {
-  products: [productResponse]
-  getProductByName(name: String!): [productResponse]
+  products: productResponse
+  getProductByName(name: String!): productResponse
   getProductById(id: ID!): productResponse
 }
 
 type Mutation {
   addNewProduct(name: String!, description: String, price: Float!, stockQuantity: Int!, categories: [String]): productResponse
-  addNewCategoryToProduct(id: ID!, categories: [String]!): productResponse
+  # addNewCategoryToProduct(id: ID!, categories: [String]!): productResponse
   updateProductById(id: ID!, name: String, description: String, price: Float, stockQuantity: Int, categories: [String]): productResponse
   deleteProductById(id: ID!): productResponse
-  activateDeactivateProductById(id: ID!): productResponse
+  # activateDeactivateProductById(id: ID!): productResponse
+  deleteCategoryById(id: ID!): productResponse
 }
 
 type productResponse {
   success: Boolean!
   message: String!
-  body: Product!
+  body: [Product!]!
 }
 
 type Product {

@@ -12,6 +12,9 @@ module.exports = {
     Mutation: {
         addNewCategory: async (_, args) => {
             return await categoriesModel.addNewCategory(args);
-        }
+        },
+        updateCategoryById: async (_, args) => {
+            return await categoriesModel.updateCategoryById(args);  
+        },
     }
 }

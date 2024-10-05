@@ -1,20 +1,20 @@
 const customersModel = require('./customers.model');
 
 module.exports = {
-    Query: {
-        customers: async () => {
-            return await customersModel.getAllCustomers();
-        },
-        getCustomerById: async (_, args) => {
-            return await customersModel.getCustomerById(args.id);
-        },
-        getCustomerByEmail: async (_, args) => {
-            return await customersModel.getCustomerByEmail(args.email);
-        }
-    },
+    // Query: {
+    //     customers: async () => {
+    //         return await customersModel.getAllCustomers();
+    //     },
+    //     getCustomerById: async (_, args) => {
+    //         return await customersModel.getCustomerById(args.id);
+    //     },
+    //     getCustomerByEmail: async (_, args) => {
+    //         return await customersModel.getCustomerByEmail(args.email);
+    //     }
+    // },
     Mutation: {
-        addNewCustomer: async (_, args) => {
-            return await customersModel.addNewCustomer(args);
-        }
+        updateCustomerById: async (_, { input }) => {
+            return await customersModel.updateCustomerById(input);
+        },
     }
 }

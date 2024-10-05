@@ -1,26 +1,35 @@
 type Query {
-    orders: [orderResponse]
+    orders: orderResponse
     getOrderById(id: ID!): orderResponse
 }
 
 type Mutation {
-    addNewOrder(customer: Int!, product: Int!, quantity: Int!, orderDate: Int!): orderResponse
+    addNewOrder(customer: Int!, products: [OrderProductInput]!): orderResponse
 }
 
 type orderResponse {
     success: Boolean!
     message: String!
-    body: Order!
+    body: [Order!]!
 }
 
 type Order {
     id: ID!
     customer: Customer!
+    products: [OrderProduct!]!
+    totalOrderAmount: Float!
+    orderDate: Int!
+    updatedAt: Int
+}
+
+type OrderProduct {
     product: Product!
     quantity: Int!
     unitPrice: Float!
     totalAmount: Float!
-    orderDate: Int!
-    createdAt: Int!
-    updatedAt: Int
+}
+
+input OrderProductInput {
+    product: ID!
+    totalAmount: Float!
 }

@@ -16,18 +16,20 @@ module.exports = {
         addNewProduct: async (_, args) => {
             return await productsModel.addNewProduct(args);
         },
-        addNewCategoryToProduct: async (_, args) => {
-            return await productsModel.addNewCategoryToProduct(args);
-        },
+        // addNewCategoryToProduct: async (_, args) => {
+        //     return await productsModel.addNewCategoryToProduct(args);
+        // },
         updateProductById: async (_, args) => {
             return await productsModel.updateProductById(args);
         },
-        // Deprecated
-        activateDeactivateProductById: async (_, args) => {
-            return await productsModel.activateDeactivateProductById(args.id);
-        },
+        // activateDeactivateProductById: async (_, args) => {
+        //     return await productsModel.activateDeactivateProductById(args.id);
+        // },
         deleteProductById: async (_, args) => {
             return await productsModel.deleteProductById(args.id);
-        }
+        },
+        deleteCategoryById: async (_, args) => {
+            return await productsModel.deleteCategoryById(args.id);
+        },
     }
 }

@@ -14,11 +14,6 @@ const categoriesSchema = new Schema({
         type: String,
         required: false,
     },
-    deleted: {
-        type: Boolean,
-        required: true,
-        default: false,
-    },
     createdAt: {
         type: Number,
         required: true,

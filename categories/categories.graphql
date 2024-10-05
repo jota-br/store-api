@@ -5,6 +5,7 @@ type Query {
 
 type Mutation {
     addNewCategory(name: String!, description: String): categoryResponse
+    updateCategoryById(id: ID!, name: String, description: String): categoryResponse
 }
 
 type categoryResponse {

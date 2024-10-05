@@ -20,7 +20,7 @@ module.exports = {
             return await usersModel.updateUserPasswordById(input);
         },
         deleteUserById: async (_, args) => {
-            return await usersModel.deleteUserById(args.id);
+            return await usersModel.deleteUserById(args);
         }
     }
 }

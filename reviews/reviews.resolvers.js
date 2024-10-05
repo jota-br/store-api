@@ -13,5 +13,8 @@ module.exports = {
         addNewReview: async (_, args) => {
             return await reviewsModel.addNewReview(args);
         },
+        updateReviewById: async (_, args) => {
+            return await reviewsModel.updateReviewById(args);  
+        },
     }
 }
