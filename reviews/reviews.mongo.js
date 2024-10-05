@@ -28,7 +28,7 @@ const reviewsSchema = new Schema({
     },
     updatedAt: {
         type: Number,
-        required: true,
+        required: false,
     },
     deleted: {
         type: Boolean,

@@ -51,7 +51,7 @@ async function getSupplierByName(name) {
         }
 
         const result = await Supplier.find({
-            name: new RegExp(name.split(" ").join("|"), "i"),
+            supplierName: new RegExp(name.split(" ").join("|"), "i"),
         }).exec();
 
         if (!result) {
@@ -76,8 +76,16 @@ async function addNewSupplier(data) {
             throw new Error(`Invalid input...`);
         }
 
-        const idIndex = await getNextId("supplierId");
+        const supplierExists = await Supplier.findOne(
+            { name: new RegExp(`${data.name}`, "i") },
+            { id: 1 },
+        );
 
+        if (supplierExists) {
+            throw new Error("Supplier with NAME ${data.name} already exists...");
+        }
+
+        const idIndex = await getNextId("supplierId");
         const date = await validations.getDate();
 
         const result = await Supplier({
@@ -90,13 +98,13 @@ async function addNewSupplier(data) {
         }).save();
 
         if (!result) {
-            throw new Error("Couldn't create new supplier...");
+            throw new Error("Couldn't create new Supplier...");
         }
 
         return {
             success: true,
             message: `Supplier was created...`,
-            body: [result],
+            body: [],
         };
     } catch (err) {
         console.error(err.message);

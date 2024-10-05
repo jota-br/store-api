@@ -106,7 +106,10 @@ async function addNewReviewToProduct(data) {
         arr.push(data.objectId);
         const result = await Product.updateOne(
             { _id: data._id },
-            { reviews: arr },
+            { 
+                reviews: arr, 
+                
+            },
             { upsert: true },
         );
 

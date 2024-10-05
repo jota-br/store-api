@@ -5,71 +5,71 @@ const { getNextId } = require("../idindex/id.index");
 const validations = require("../services/validations");
 const security = require("../services/security.password");
 
-// async function getAllCustomers() {
-//     try {
-//         const result = await Customer.find({}, {}).exec();
-//         if (!result) {
-//             throw new Error(`Couldn\'t find Customers...`);
-//         }
+async function getAllCustomers() {
+    try {
+        const result = await Customer.find({}, {}).exec();
+        if (!result) {
+            throw new Error(`Couldn\'t find Customers...`);
+        }
 
-//         return {
-//             success: true,
-//             message: `Fetched all Customers...`,
-//             body: (Array.isArray(result) ? result : [result]),
-//         };
-//     } catch (err) {
-//         console.error(err.message);
-//         return { success: false, message: err.message, body: [] };
-//     }
-// }
+        return {
+            success: true,
+            message: `Fetched all Customers...`,
+            body: (Array.isArray(result) ? result : [result]),
+        };
+    } catch (err) {
+        console.error(err.message);
+        return { success: false, message: err.message, body: [] };
+    }
+}
 
-// async function getCustomerById(id) {
-//     try {
-//         let isValidString = await validations.validateString(id);
-//         if (!isValidString) {
-//             throw new Error(`Invalid input...`);
-//         }
+async function getCustomerById(id) {
+    try {
+        let isValidString = await validations.validateString(id);
+        if (!isValidString) {
+            throw new Error(`Invalid input...`);
+        }
 
-//         const result = await Customer.findOne({ id: id });
-//         if (!result) {
-//             throw new Error(`Couldn\'t return customer with ID ${id}`);
-//         }
+        const result = await Customer.findOne({ id: id });
+        if (!result) {
+            throw new Error(`Couldn\'t return customer with ID ${id}`);
+        }
 
-//         return {
-//             success: true,
-//             message: `Customer with ID ${id} found...`,
-//             body: [result],
-//         };
-//     } catch (err) {
-//         console.error(err.message);
-//         return { success: false, message: err.message, body: [] };
-//     }
-// }
+        return {
+            success: true,
+            message: `Customer with ID ${id} found...`,
+            body: [result],
+        };
+    } catch (err) {
+        console.error(err.message);
+        return { success: false, message: err.message, body: [] };
+    }
+}
 
-// async function getCustomerByEmail(email) {
-//     try {
-//         let isValidEmail = await validations.validateEmail(email);
-//         if (!isValidEmail) {
-//             throw new Error(
-//                 `Email ${data.email} is invalid. Valid email format example@example.com....`,
-//             );
-//         }
+async function getCustomerByEmail(email) {
+    try {
+        let isValidEmail = await validations.validateEmail(email);
+        if (!isValidEmail) {
+            throw new Error(
+                `Email ${data.email} is invalid. Valid email format example@example.com....`,
+            );
+        }
 
-//         const result = await Customer.findOne({ email: email }, {}).exec();
-//         if (!result) {
-//             throw new Error(`Couldn\'t return Customer with EMAIL ${email}`);
-//         }
+        const result = await Customer.findOne({ email: email }, {}).exec();
+        if (!result) {
+            throw new Error(`Couldn\'t return Customer with EMAIL ${email}`);
+        }
 
-//         return {
-//             success: true,
-//             message: `Customer with EMAIL ${email} found...`,
-//             body: [result],
-//         };
-//     } catch (err) {
-//         console.error(err.message);
-//         return { success: false, message: err.message, body: [] };
-//     }
-// }
+        return {
+            success: true,
+            message: `Customer with EMAIL ${email} found...`,
+            body: [result],
+        };
+    } catch (err) {
+        console.error(err.message);
+        return { success: false, message: err.message, body: [] };
+    }
+}
 
 async function updateCustomerById(data) {
     try {
@@ -204,6 +204,9 @@ async function deleteCustumerById(id) {
 }
 
 module.exports = {
+    getAllCustomers,
+    getCustomerById,
+    getCustomerByEmail,
     addNewCustomer,
     deleteCustumerById,
     updateCustomerById,

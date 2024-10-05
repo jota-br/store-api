@@ -47,7 +47,7 @@ async function getReviewById(id) {
         return {
             success: true,
             message: `Fetched Review with ID ${id}...`,
-            body: result,
+            body: [result],
         };
     } catch (err) {
         console.error(err.message);
@@ -63,18 +63,14 @@ async function addNewReview(data) {
         }
 
         // get customer ObjectId
-        const customerObjectId = await customersModel.getCustomerById(
-            data.customer,
-        );
-        if (!customerObjectId) {
+        const customerObjectId = await customersModel.getCustomerById(data.customer);
+        if (!customerObjectId.success) {
             throw new Error("Invalid Customer ID...");
         }
 
         // get customer ObjectId
-        const productObjectId = await productsModel.getProductById(
-            data.product,
-        );
-        if (!productObjectId) {
+        const productObjectId = await productsModel.getProductById(data.product);
+        if (!productObjectId.success) {
             throw new Error("Invalid Product ID...");
         }
 
@@ -82,13 +78,12 @@ async function addNewReview(data) {
         date = await validations.getDate();
 
         const result = await Review(
-            { customer: customerObjectId._id, product: productObjectId._id },
             {
                 id: idIndex,
                 comment: data.comment,
                 rating: data.rating,
-                customer: customerObjectId._id,
-                product: productObjectId._id,
+                customer: customerObjectId.body[0]._id,
+                product: productObjectId.body[0]._id,
                 createdAt: date,
             },
         ).save();
@@ -102,7 +97,7 @@ async function addNewReview(data) {
             { _id: 1 },
         ).exec();
         let ProductWithReview = {
-            _id: productObjectId._id,
+            _id: productObjectId.body[0]._id,
             objectId: reviewObjectId._id,
         };
         if (!reviewObjectId) {
@@ -115,18 +110,10 @@ async function addNewReview(data) {
             throw new Error(`Couldn\'t associate Review with Product...`);
         }
 
-        const updatedResult = await Review.findOne(
-            { customer: customerObjectId._id, product: productObjectId._id },
-            {},
-        )
-            .populate("customer")
-            .populate("product")
-            .exec();
-
         return {
             success: true,
             message: `Review was created...`,
-            body: [updatedResult],
+            body: [],
         };
     } catch (err) {
         console.error(err.message);
@@ -143,7 +130,7 @@ async function updateReviewById(data) {
 
         const reviewExists = await Review.findOne({ id: data.id }, {});
         if (!reviewExists) {
-            throw new Error(`Couldn\'t find Review with ID ${id}`);
+            throw new Error(`Couldn\'t find Review with ID ${data.id}`);
         }
 
         date = await validations.getDate();
@@ -155,22 +142,16 @@ async function updateReviewById(data) {
                 updatedAt: date,
             },
             { upsert: true },
-        )
-            .exec();
+        );
 
-        if (!result.ackowledged) {
-            throw new Error(`Couldn\'t update Review with ID ${id}`);
+        if (!result.acknowledged) {
+            throw new Error(`Couldn\'t update Review with ID ${data.id}`);
         }
-
-        const updatedReview = await Review.findOne({ id: data.id }, {})
-            .populate("customer")
-            .populate("product")
-            .exec();
 
         return {
             success: true,
             message: `Review was updated...`,
-            body: [updatedReview],
+            body: [],
         };
         
     } catch (err) {
