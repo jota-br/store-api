@@ -5,6 +5,7 @@ type Query {
 
 type Mutation {
     addNewOrder(customer: Int!, productsInput: [OrderProductInput]!): orderResponse
+    cancelOrderById(id: ID!): orderResponse
 }
 
 type orderResponse {
@@ -19,7 +20,10 @@ type Order {
     products: [OrderProduct!]!
     totalOrderAmount: Float!
     orderDate: Int!
+    delivered: Boolean
+    deliveryDate: Int
     updatedAt: Int
+    canceled: Boolean
 }
 
 type OrderProduct {

@@ -12,6 +12,9 @@ module.exports = {
     Mutation: {
         addNewOrder: async (_, { productsInput, customer }) => {
             return await ordersModel.addNewOrder(productsInput, customer);
-        }
+        },
+        cancelOrderById: async (_, args) => {
+            return await ordersModel.cancelOrderById(args.id);
+        },
     }
 }

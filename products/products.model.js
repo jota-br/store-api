@@ -5,9 +5,11 @@ const categoriesModel = require("../categories/categories.model");
 
 const { getNextId } = require("../idindex/id.index");
 const validations = require("../services/validations");
+const functionTace = require("../services/function.trace");
 
 async function getAllProducts() {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         const result = await Product.find({}, {})
             .populate("categories")
             .populate("reviews")
@@ -16,59 +18,70 @@ async function getAllProducts() {
             throw new Error(`Couldn\'t find Products...`);
         }
 
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('getAllProducts', null, execTime);
+
         return {
             success: true,
             message: `Fetched all Products...`,
             body: Array.isArray(result) ? result : [result],
         };
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('getAllProducts', null, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
 
 async function getProductById(id) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let isValidString = await validations.validateString(id);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
         }
-
+        
         const result = await Product.findOne({ id: id })
-            .populate("categories")
-            .populate("reviews")
+        .populate("categories")
+        .populate("reviews")
             .exec();
-        if (!result) {
-            throw new Error(`Couldn\'t return product with ID ${id}`);
-        }
-
+            if (!result) {
+                throw new Error(`Couldn\'t return product with ID ${id}`);
+            }
+            
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('getProductById', id, execTime);
+        
         return {
             success: true,
             message: `Product with ID ${id} found...`,
             body: [result],
         };
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('getProductById', id, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
 
 async function getProductByName(name) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let isValidString = await validations.validateString(name);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
         }
-
+        
         const result = await Product.find({
             name: new RegExp(name.split(" ").join("|"), "i"),
         })
             .populate("categories")
             .populate("reviews")
             .exec();
-        if (!result) {
-            throw new Error(`Couldn\'t return product with name ${name}`);
-        }
+            if (!result) {
+                throw new Error(`Couldn\'t return product with name ${name}`);
+            }
+
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('getProductByName', name, execTime);
 
         return {
             success: true,
@@ -76,7 +89,7 @@ async function getProductByName(name) {
             body: Array.isArray(result) ? result : [result],
         };
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('getProductByName', name, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
@@ -84,16 +97,17 @@ async function getProductByName(name) {
 // Slave addNewReview
 async function addNewReviewToProduct(data) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let isValidString = await validations.validateString(data);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
         }
-
+        
         const productExists = await Product.findOne(
             { _id: data._id },
             { id: 1, reviews: 1 },
         );
-
+        
         if (!productExists) {
             throw new Error(
                 `Couldn\'t find Product with ID ${productExists.id}...`,
@@ -112,10 +126,13 @@ async function addNewReviewToProduct(data) {
             },
             { upsert: true },
         );
+        
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('getProductByName', data, execTime);
 
         return (result.acknowledged);
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('getProductByName', data, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
@@ -173,6 +190,7 @@ async function addNewReviewToProduct(data) {
 
 async function addNewProduct(data) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let isValidString = await validations.validateString(data);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
@@ -191,7 +209,7 @@ async function addNewProduct(data) {
 
         const idIndex = await getNextId("productId");
         const date = await validations.getDate();
-
+        
         const result = await Product({
             id: idIndex,
             name: data.name,
@@ -201,10 +219,13 @@ async function addNewProduct(data) {
             categories: arr,
             createdAt: date,
         }).save();
-
+        
         if (!result) {
             throw new Error("Couldn't create new product...");
         }
+        
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('addNewProduct', data, execTime);
 
         return {
             success: true,
@@ -212,18 +233,19 @@ async function addNewProduct(data) {
             body: [],
         };
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('addNewProduct', data, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
 
 async function updateProductById(data) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let isValidString = await validations.validateString(data);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
         }
-
+        
         let productExists = await Product.findOne({ id: data.id }, {})
             .populate("categories")
             .exec();
@@ -283,10 +305,13 @@ async function updateProductById(data) {
             },
             { upsert: false },
         );
-
+        
         if (!result.acknowledged) {
             throw new Error(`Couldn\'t update Product with ID ${data.id}...`);
         }
+        
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('updateProductById', data, execTime);
 
         return {
             success: true,
@@ -294,7 +319,7 @@ async function updateProductById(data) {
             body: [],
         };
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('updateProductById', data, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
@@ -350,6 +375,7 @@ async function updateProductById(data) {
 
 async function deleteProductById(id) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let isValidString = await validations.validateString(id);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
@@ -371,14 +397,14 @@ async function deleteProductById(id) {
                         { deleted: true, },
                         { upsert: true },
                     );
-
+                    
                     if (!reviewResult.acknowledged) {
                         throw new Error(`Couldn\'t delete Review...`);
                     }
                 }
             }),
         );
-
+        
         const result = await Product.updateOne(
             { id: id },
             { deleted: true },
@@ -387,13 +413,17 @@ async function deleteProductById(id) {
         if (!result.acknowledged) {
             throw new Error(`Couldn\'t delete product with ID ${id}...`);
         }
+
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('deleteProductById', null, execTime);
+
         return {
             success: true,
             message: `Product with ID ${id} was deleted...`,
             body: [],
         };
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('deleteProductById', null, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
@@ -401,6 +431,7 @@ async function deleteProductById(id) {
 // Slave deleteCategoryById
 async function deleteCategoryFromProductById(categoryId) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let categoryExistsInProduct = await Product.findOne(
             { categories: categoryId },
             { id: 1, categories: 1 },
@@ -429,16 +460,20 @@ async function deleteCategoryFromProductById(categoryId) {
             },
             { upsert: true },
         );
+        
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('deleteCategoryFromProductById', id, execTime);
 
         return (result.acknowledged);
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('deleteCategoryFromProductById', id, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
 
 async function deleteCategoryById(id) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let isValidString = await validations.validateString(id);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
@@ -448,22 +483,25 @@ async function deleteCategoryById(id) {
         if (!categoryExists.success) {
             throw new Error(`Couldn\'t find Category with ID ${id}`);
         }
-
+        
         if (categoryExists.deleted) {
             throw new Error(`Category with ID ${id} already deleted...`);
         }
-
+        
         const productResult = await deleteCategoryFromProductById(categoryExists.body[0]._id);
-
+        
         if (!productResult) {
             throw new Error(`Couldn\'t delete Category with ID ${id} from associated Product\'s...`);
         }
 
         const result = await categoriesModel.deleteCategoryByIdUtil(id);
-
+        
         if (!result) {
             throw new Error(`Couldn\'t delete Category with ID ${id}...`);
         }
+        
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('deleteCategoryById', id, execTime);
 
         return {
             success: true,
@@ -472,7 +510,7 @@ async function deleteCategoryById(id) {
         };
 
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('deleteCategoryById', id, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }

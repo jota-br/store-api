@@ -2,18 +2,26 @@ const Order = require("./orders.mongo");
 const Product = require("../products/products.mongo");
 const Customer = require("../customers/costumers.mongo");
 
-const productsModel = require("../products/products.model");
-const customersModel = require("../customers/customers.model");
-
 const { getNextId } = require("../idindex/id.index");
 const validations = require("../services/validations");
+const functionTace = require("../services/function.trace");
 
 async function getAllOrders() {
     try {
-        const result = await Order.find({}, {}).populate("customer").exec();
-        if (!result) {
-            throw new Error(`Couldn\'t find Orders...`);
-        }
+        const startTime = await functionTace.executionTime(false, false);
+        const result = await Order.find({}, {})
+        .populate("customer")
+            .populate({
+                path: 'products.product',
+                model: 'Product',
+            })
+            .exec();
+            if (!result) {
+                throw new Error(`Couldn\'t find Orders...`);
+            }
+            
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('getAllOrders', null, execTime);
 
         return {
             success: true,
@@ -21,24 +29,32 @@ async function getAllOrders() {
             body: Array.isArray(result) ? result : [result],
         };
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('getAllOrders', null, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
 
 async function getOrderById(id) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let isValidString = await validations.validateString(id);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
-
+        
         const result = await Order.findOne({ id: Number(id) })
             .populate("customer")
+            .populate({
+                path: 'products.product',
+                model: 'Product',
+            })
             .exec();
-        if (!result) {
-            throw new Error(`Couldn\'t return Order with ID ${id}`);
+            if (!result) {
+                throw new Error(`Couldn\'t return Order with ID ${id}`);
         }
+        
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('getOrderById', id, execTime);
 
         return {
             success: true,
@@ -46,23 +62,24 @@ async function getOrderById(id) {
             body: [result],
         };
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('getOrderById', id, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
 
 async function addNewOrder(productsInput, customer) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let validate = {
             order: productsInput,
             customer: customer,
         }
-        console.log(validate);
+        
         let isValidString = await validations.validateString(validate);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
-
+        
         const customerObject = await Customer.findOne({ id: customer }, { _id: 1 });
         if (!customerObject) {
             throw new Error("Ivalid Customer ID...");
@@ -71,7 +88,7 @@ async function addNewOrder(productsInput, customer) {
         let arrProductsId = [];
         let arrProductsQuantity = [];
         let arrProductCurrentStock = [];
-
+        
         const products = await Promise.all(productsInput.map(async (product) => {
             const productObject = await Product.findOne({ id: product.productId }, { _id: 1, stockQuantity: 1, name: 1, price: 1 });
             if (!productObject) {
@@ -85,7 +102,8 @@ async function addNewOrder(productsInput, customer) {
             arrProductsId.push(productObject._id);
             arrProductsQuantity.push(product.quantity);
             arrProductCurrentStock.push(productObject.stockQuantity);
-
+            
+            
             return {
                 product: productObject._id,
                 quantity: product.quantity,
@@ -121,19 +139,65 @@ async function addNewOrder(productsInput, customer) {
         if (!result) {
             throw new Error("Couldn\'t create new order...");
         }
-
+        
         await result.populate("customer");
         await result.populate({
             path: 'products.product',
             model: 'Product',
         });
+
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('addNewOrder', {productsInput, customer}, execTime);
+
         return {
             success: true,
             message: `Order with ID ${result.id} was created successfully...`,
             body: [result],
         };
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('addNewOrder', { productsInput, customer }, err.message);
+        return { success: false, message: err.message, body: [] };
+    }
+}
+
+async function cancelOrderById(id) {
+    try {
+        const startTime = await functionTace.executionTime(false, false);
+        let isValidString = await validations.validateString(id);
+        if (!isValidString) {
+            throw new Error(`Invalid character found...`);
+        }
+        
+        const orderExists = Order.findOne({ id: id }, { id: 1 });
+
+        if (!orderExists) {
+            throw new Error(`Couldn\'t find Order with ID ${id}...`);
+        }
+        
+        const date = await validations.getDate();
+        const result = await Order.updateOne(
+            { id: id },
+            { 
+                canceled: true,
+                updatedAt: date,
+            },
+            { upsert: true },
+        );
+        
+        if (!result.acknowledged) {
+            throw new Error(`Couldn\'t delete Order with ID ${id}...`);
+        }
+        
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('cancelOrderById', id, execTime);
+
+        return {
+            success: true,
+            message: `Order with ID ${id} was deleted...`,
+            body: [],
+        };
+    } catch (err) {
+        functionTace.functionTraceEmitError('cancelOrderById', id, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
@@ -142,4 +206,5 @@ module.exports = {
     getAllOrders,
     getOrderById,
     addNewOrder,
+    cancelOrderById,
 };

@@ -2,13 +2,18 @@ const Category = require("./categories.mongo");
 
 const { getNextId } = require("../idindex/id.index");
 const validations = require("../services/validations");
+const functionTace = require("../services/function.trace");
 
 async function getAllCategories() {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         const result = await Category.find({}, {}).exec();
         if (!result) {
             throw new Error(`Couldn\'t find Categories...`);
         }
+        
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('getAllCategories', null, execTime);
 
         return {
             success: true,
@@ -16,13 +21,14 @@ async function getAllCategories() {
             body: Array.isArray(result) ? result : [result],
         };
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('getAllCategories', null, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
 
 async function getCategoryById(id) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let isValidString = await validations.validateString(id);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
@@ -33,19 +39,23 @@ async function getCategoryById(id) {
             throw new Error(`Couldn\'t return category with ID ${id}`);
         }
 
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('getCategoryById', id, execTime);
+
         return {
             success: true,
             message: `Category with ID ${id} found...`,
             body: [result],
         };
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('getCategoryById', id, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
 
 async function getCategoryByName(name) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let isValidString = await validations.validateString(name);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
@@ -58,6 +68,9 @@ async function getCategoryByName(name) {
         if (!result) {
             throw new Error(`Couldn\'t return Category with NAME ${name}`);
         }
+        
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('getCategoryByName', name, execTime);
 
         return {
             success: true,
@@ -65,18 +78,19 @@ async function getCategoryByName(name) {
             body: [result],
         };
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('getCategoryByName', name, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
 
 async function addNewCategory(data) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let isValidString = await validations.validateString(data);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
         }
-
+        
         let category = await getCategoryByName(data.name);
         if (category.success) {
             throw new Error(`Category with NAME ${data.name} already exists...`,);
@@ -91,10 +105,13 @@ async function addNewCategory(data) {
             description: data.description || null,
             createdAt: date,
         }).save();
-
+        
         if (!result) {
             throw new Error("Couldn't create new category...");
         }
+        
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('addNewCategory', data, execTime);
 
         return {
             success: true,
@@ -102,13 +119,14 @@ async function addNewCategory(data) {
             body: [result],
         };
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('addNewCategory', data, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
 
 async function updateCategoryById(data) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         let isValidString = await validations.validateString(data);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
@@ -128,7 +146,7 @@ async function updateCategoryById(data) {
         }
 
         const date = await validations.getDate();
-
+        
         const result = await Category.updateOne(
             { id: data.id },
             {
@@ -138,21 +156,22 @@ async function updateCategoryById(data) {
             },
             { upsert: true }
         );
-
+        
         if (!result.acknowledged) {
             throw new Error(`Couldn\'t update Category with ID ${id}`);
         }
-
-        const updatedResult = await Category.findOne({ id: id }, {});
+        
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('updateCategoryById', data, execTime);
 
         return {
             success: true,
             message: `Category was created...`,
-            body: [updatedResult],
+            body: [],
         };
         
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('updateCategoryById', data, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }
@@ -160,10 +179,15 @@ async function updateCategoryById(data) {
 // Slave deleteCategoryById
 async function deleteCategoryByIdUtil(id) {
     try {
+        const startTime = await functionTace.executionTime(false, false);
         const result = await Category.deleteOne({ id: id });
+
+        const execTime = await functionTace.executionTime(startTime, false);
+        functionTace.functionTraceEmit('deleteCategoryByIdUtil', id, execTime);
+
         return (result.deletedCount === 1);
     } catch (err) {
-        console.error(err.message);
+        functionTace.functionTraceEmitError('deleteCategoryByIdUtil', id, err.message);
         return { success: false, message: err.message, body: [] };
     }
 }

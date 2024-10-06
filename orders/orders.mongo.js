@@ -38,9 +38,23 @@ const ordersSchema = new Schema({
         type: Number,
         required: true,
     },
+    delivered: {
+        type: Boolean,
+        required: false,
+        default: false,
+    },
+    deliveryDate: {
+        type: Number,
+        required: false,
+    },
     updatedAt: {
         type: Number,
         required: false,
+    },
+    canceled: {
+        type: Boolean,
+        required: false,
+        default: false,
     }
 });
 
