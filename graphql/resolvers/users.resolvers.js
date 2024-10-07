@@ -1,4 +1,4 @@
-const usersModel = require('../models/users.model');
+const usersModel = require('../../models/users.model');
 
 module.exports = {
     Query: {

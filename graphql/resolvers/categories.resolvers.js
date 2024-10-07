@@ -1,4 +1,4 @@
-const categoriesModel = require('../models/categories.model');
+const categoriesModel = require('../../models/categories.model');
 
 module.exports = {
     Query: {

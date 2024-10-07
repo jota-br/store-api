@@ -163,7 +163,7 @@ async function addNewReviewToProduct(data) {
 //                     category = await categoriesModel.addNewCategory({ name });
 //                 }
 //                 let pushId = (category._id) ? category._id : category.body[0]._id;
-                	arr.push(pushId);
+//                	arr.push(pushId);
 //             }),
 //         );
 

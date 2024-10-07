@@ -1,3 +1,6 @@
+const { mongoose } = require('mongoose');
+const { Schema, model } = mongoose;
+
 const reviewsSchema = new Schema({
     id: {
         type: Number,

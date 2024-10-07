@@ -1,3 +1,6 @@
+const { mongoose } = require('mongoose');
+const { Schema, model } = mongoose;
+
 const suppliersSchema = new Schema({
     id: {
         type: Number,

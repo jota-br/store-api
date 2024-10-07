@@ -1,4 +1,4 @@
-const reviewsModel = require('../models/reviews.model');
+const reviewsModel = require('../../models/reviews.model');
 
 module.exports = {
     Query: {

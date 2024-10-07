@@ -1,3 +1,6 @@
+const { mongoose } = require('mongoose');
+const { Schema, model } = mongoose;
+
 const categoriesSchema = new Schema({
     id: {
         type: Number,

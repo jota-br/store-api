@@ -1,4 +1,4 @@
-const suppliersModel = require('../models/supplier.model');
+const suppliersModel = require('../../models/suppliers.model');
 
 module.exports = {
     Query: {
