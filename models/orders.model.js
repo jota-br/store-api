@@ -1,15 +1,13 @@
-const Order = require("./orders.mongo");
-const Product = require("../products/products.mongo");
-const Customer = require("../customers/costumers.mongo");
+const Models = require("./mongo.model");
 
 const { getNextId } = require("../idindex/id.index");
-const validations = require("../services/validations");
-const functionTace = require("../services/function.trace");
+const validations = require("../utils/validations");
+const functionTace = require("../utils/function.trace");
 
 async function getAllOrders() {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        const result = await Order.find({}, {})
+        const result = await Models.Order.find({}, {})
         .populate("customer")
             .populate({
                 path: 'products.product',
@@ -42,7 +40,7 @@ async function getOrderById(id) {
             throw new Error(`Invalid character found...`);
         }
         
-        const result = await Order.findOne({ id: Number(id) })
+        const result = await Models.Order.findOne({ id: Number(id) })
             .populate("customer")
             .populate({
                 path: 'products.product',
@@ -80,7 +78,7 @@ async function addNewOrder(productsInput, customer) {
             throw new Error(`Invalid character found...`);
         }
         
-        const customerObject = await Customer.findOne({ id: customer }, { _id: 1 });
+        const customerObject = await Models.Customer.findOne({ id: customer }, { _id: 1 });
         if (!customerObject) {
             throw new Error("Ivalid Customer ID...");
         }
@@ -114,7 +112,7 @@ async function addNewOrder(productsInput, customer) {
 
         await Promise.all(arrProductsId.map(async (productId) => {
             const index = arrProductsId.indexOf(productId);
-            const stockResult = await Product.updateOne (
+            const stockResult = await Models.Product.updateOne (
                 { _id: productId },
                 { stockQuantity: (arrProductCurrentStock[index] - arrProductsQuantity[index]) }
             );
@@ -128,7 +126,7 @@ async function addNewOrder(productsInput, customer) {
         const date = await validations.getDate();
         const totalOrderAmount = products.reduce((sum, item) => sum + item.totalAmount, 0);
 
-        const result = await Order({
+        const result = await Models.Order({
             id: idIndex,
             customer: customerObject._id,
             products: products,
@@ -168,14 +166,14 @@ async function cancelOrderById(id) {
             throw new Error(`Invalid character found...`);
         }
         
-        const orderExists = Order.findOne({ id: id }, { id: 1 });
+        const orderExists = Models.Order.findOne({ id: id }, { id: 1 });
 
         if (!orderExists) {
             throw new Error(`Couldn\'t find Order with ID ${id}...`);
         }
         
         const date = await validations.getDate();
-        const result = await Order.updateOne(
+        const result = await Models.Order.updateOne(
             { id: id },
             { 
                 canceled: true,

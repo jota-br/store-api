@@ -1,17 +1,16 @@
-const User = require("./users.mongo");
-const Customer = require("../customers/costumers.mongo");
+const Models = require("./mongo.model");
 
-const customersModel = require("../customers/customers.model");
+const customersModel = require("./customers.model");
 
 const { getNextId } = require("../idindex/id.index");
-const validations = require("../services/validations");
-const security = require("../services/security.password");
-const functionTace = require("../services/function.trace");
+const validations = require("../utils/validations");
+const security = require("../utils/security.password");
+const functionTace = require("../utils/function.trace");
 
 async function getAllUsers() {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        const result = await User.find({}, {})
+        const result = await Models.User.find({}, {})
         .populate("customer")
         .exec();
         if (!result) {
@@ -41,7 +40,7 @@ async function getUserById(id) {
         }
 
         // fetch User with ${id} and populate User with Customer data
-        const result = await User.findOne({ id: id })
+        const result = await Models.User.findOne({ id: id })
         .populate("customer")
         .exec();
         
@@ -71,7 +70,7 @@ async function getUserByEmail(email) {
             throw new Error(`Invalid input...`);
         }
         
-        const result = await User.findOne({ email: email }).exec();
+        const result = await Models.User.findOne({ email: email }).exec();
         if (!result) {
             throw new Error(`Couldn\'t return user with EMAIL ${email}`);
         }
@@ -108,17 +107,17 @@ async function addNewUser(data) {
             );
         }
 
-        const emailExists = await User.findOne({ email: data.email }, { id: 1 });
+        const emailExists = await Models.User.findOne({ email: data.email }, 'id');
         if (emailExists) {
             throw new Error(`Email ${data.email} already in use...`);
         }
         
         const customerResult = await customersModel.addNewCustomer(data);
-        if (!customerResult) {
+        if (!customerResult.success) {
             throw new Error("Couldn't create new Customer...");
         }
 
-        const customerObjectId = await Customer.findOne({ email: data.email }, { _id: 1 });
+        const customerObjectId = await Models.Customer.findOne({ email: data.email }, '_id');
         
         if (!customerObjectId) {
             throw new Error("Couldn't retrieve Customer data...");
@@ -130,7 +129,7 @@ async function addNewUser(data) {
         
         const { hash, salt } = await security.hashPassword(data.password);
         
-        const result = await User({
+        const result = await Models.User({
             id: idIndex,
             email: data.email,
             salt: salt,
@@ -165,7 +164,7 @@ async function updateUserPasswordById(data) {
             throw new Error(`Invalid input...`);
         }
 
-        const userExists = await User.findOne(
+        const userExists = await Models.User.findOne(
             { id: data.id },
             { salt: 1, hash: 1 },
         ).exec();
@@ -186,7 +185,7 @@ async function updateUserPasswordById(data) {
         const { hash, salt } = await security.hashPassword(data.newPassword);
         const date = await validations.getDate();
         
-        const result = await User.updateOne(
+        const result = await Models.User.updateOne(
             { id: data.id },
             {
                 salt: salt,
@@ -222,7 +221,7 @@ async function deleteUserById(data) {
             throw new Error(`Invalid input...`);
         }
         
-        const userExists = await User.findOne(
+        const userExists = await Models.User.findOne(
             { id: data.id },
             { customer: 1, deleted: 1, salt: 1, hash: 1, },
         )
@@ -247,7 +246,7 @@ async function deleteUserById(data) {
             throw new Error(`Invalid credential...`);
         }
 
-        result = await User.updateOne(
+        result = await Models.User.updateOne(
             { id: data.id },
             { deleted: true },
             { upsert: true },

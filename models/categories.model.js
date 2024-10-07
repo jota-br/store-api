@@ -1,13 +1,13 @@
-const Category = require("./categories.mongo");
+const Models = require("./mongo.model");
 
 const { getNextId } = require("../idindex/id.index");
-const validations = require("../services/validations");
-const functionTace = require("../services/function.trace");
+const validations = require("../utils/validations");
+const functionTace = require("../utils/function.trace");
 
 async function getAllCategories() {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        const result = await Category.find({}, {}).exec();
+        const result = await Models.Category.find({}, {}).exec();
         if (!result) {
             throw new Error(`Couldn\'t find Categories...`);
         }
@@ -34,7 +34,7 @@ async function getCategoryById(id) {
             throw new Error(`Invalid input...`);
         }
 
-        const result = await Category.findOne({ id: Number(id) });
+        const result = await Models.Category.findOne({ id: Number(id) });
         if (!result) {
             throw new Error(`Couldn\'t return category with ID ${id}`);
         }
@@ -61,17 +61,15 @@ async function getCategoryByName(name) {
             throw new Error(`Invalid character found...`);
         }
 
-        const result = await Category.findOne(
-            { name: new RegExp(`${name}`, "i") },
-            {},
-        );
+        const result = await Models.Category.findOne(
+            { name: new RegExp(`${name}`, "i") }
+        ).exec();
         if (!result) {
             throw new Error(`Couldn\'t return Category with NAME ${name}`);
         }
         
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('getCategoryByName', name, execTime);
-
         return {
             success: true,
             message: `Category with NAME ${name} found...`,
@@ -91,15 +89,15 @@ async function addNewCategory(data) {
             throw new Error(`Invalid input...`);
         }
         
-        let category = await getCategoryByName(data.name);
-        if (category.success) {
+        let category = await Models.Category.findOne({ name: data.name }, 'name');
+        if (category) {
             throw new Error(`Category with NAME ${data.name} already exists...`,);
         }
 
         const idIndex = await getNextId("categoryId");
         const date = await validations.getDate();
         
-        const result = await Category({
+        const result = await Models.Category({
             id: idIndex,
             name: data.name,
             description: data.description || null,
@@ -132,10 +130,7 @@ async function updateCategoryById(data) {
             throw new Error(`Invalid character found...`);
         }
 
-        const categoryExists = await Category.findOne(
-            { id: data.id },
-            {},
-        );
+        const categoryExists = await Models.Category.findOne({ id: data.id }, 'name');
         if (!categoryExists) {
             throw new Error(`Couldn\'t find Category with ID ${id}`);
         }
@@ -147,7 +142,7 @@ async function updateCategoryById(data) {
 
         const date = await validations.getDate();
         
-        const result = await Category.updateOne(
+        const result = await Models.Category.updateOne(
             { id: data.id },
             {
                 name: dataToUse.name,
@@ -177,10 +172,10 @@ async function updateCategoryById(data) {
 }
 
 // Slave deleteCategoryById
-async function deleteCategoryByIdUtil(id) {
+async function deleteCategoryById(id) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        const result = await Category.deleteOne({ id: id });
+        const result = await Models.Category.deleteOne({ id: id });
 
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('deleteCategoryByIdUtil', id, execTime);
@@ -198,5 +193,5 @@ module.exports = {
     getCategoryByName,
     addNewCategory,
     updateCategoryById,
-    deleteCategoryByIdUtil,
+    deleteCategoryById,
 };

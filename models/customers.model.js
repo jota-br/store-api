@@ -1,15 +1,14 @@
-const Customer = require("./costumers.mongo");
-const User = require("../users/users.mongo");
+const Models = require("./mongo.model");
 
 const { getNextId } = require("../idindex/id.index");
-const validations = require("../services/validations");
-const security = require("../services/security.password");
-const functionTace = require("../services/function.trace");
+const validations = require("../utils/validations");
+const security = require("../utils/security.password");
+const functionTace = require("../utils/function.trace");
 
 async function getAllCustomers() {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        const result = await Customer.find({}, {}).exec();
+        const result = await Models.Customer.find({}, {}).exec();
         if (!result) {
             throw new Error(`Couldn\'t find Customers...`);
         }
@@ -36,7 +35,7 @@ async function getCustomerById(id) {
             throw new Error(`Invalid input...`);
         }
         
-        const result = await Customer.findOne({ id: id });
+        const result = await Models.Customer.findOne({ id: id });
         if (!result) {
             throw new Error(`Couldn\'t return customer with ID ${id}`);
         }
@@ -65,7 +64,7 @@ async function getCustomerByEmail(email) {
             );
         }
 
-        const result = await Customer.findOne({ email: email }, {}).exec();
+        const result = await Models.Customer.findOne({ email: email }, {}).exec();
         if (!result) {
             throw new Error(`Couldn\'t return Customer with EMAIL ${email}`);
         }
@@ -93,12 +92,12 @@ async function updateCustomerById(data) {
             throw new Error(`Invalid input...`);
         }
         
-        const customerWithIdExists = await Customer.findOne({ id: data.id }, { id: 1, firstName: 1, lastName: 1, phone: 1, address: 1, email: 1 });
+        const customerWithIdExists = await Models.Customer.findOne({ id: data.id }, { id: 1, firstName: 1, lastName: 1, phone: 1, address: 1, email: 1 });
         if (!customerWithIdExists) {
             throw new Error(`Couldn\'t find Customer with ID ${data.id}...`);
         }
 
-        const userWithIdExists = await User.findOne({ email: customerWithIdExists.email}, { salt: 1, hash: 1 });
+        const userWithIdExists = await Models.User.findOne({ email: customerWithIdExists.email}, { salt: 1, hash: 1 });
         if (!userWithIdExists) {
             throw new Error(`Couldn\'t find User with ID ${data.id}...`);
         }
@@ -122,7 +121,7 @@ async function updateCustomerById(data) {
             updatedAt: date,
         };
 
-        const result = await Customer.updateOne(
+        const result = await Models.Customer.updateOne(
             { id: data.id },
             {
                 firstName: dataToUse.firstName,
@@ -168,7 +167,7 @@ async function addNewCustomer(data) {
             );
         }
 
-        const emailExists = await Customer.findOne({ email: data.email }, { id: 1 });
+        const emailExists = await Models.Customer.findOne({ email: data.email }, { id: 1 });
         if (emailExists) {
             throw new Error(`Email ${data.email} already in use...`);
         }
@@ -176,7 +175,7 @@ async function addNewCustomer(data) {
         const idIndex = await getNextId("customerId");
         const date = await validations.getDate();
         
-        const result = await Customer({
+        const result = await Models.Customer({
             id: idIndex,
             firstName: data.firstName || null,
             lastName: data.lastName || null,
@@ -209,7 +208,7 @@ async function deleteCustumerById(id) {
     try {
         const startTime = await functionTace.executionTime(false, false);
         const date = await validations.getDate();
-        const result = await Customer.updateOne(
+        const result = await Models.Customer.updateOne(
             { id: id },
             { 
                 deleted: true,

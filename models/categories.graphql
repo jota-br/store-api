@@ -1,6 +1,7 @@
 type Query {
     categories: categoryResponse
     getCategoryById(id: ID!): categoryResponse
+    getCategoryByName(name: String!): categoryResponse
 }
 
 type Mutation {

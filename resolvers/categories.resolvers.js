@@ -1,4 +1,4 @@
-const categoriesModel = require('./categories.model');
+const categoriesModel = require('../models/categories.model');
 
 module.exports = {
     Query: {
@@ -7,6 +7,9 @@ module.exports = {
         },
         getCategoryById: async (_, args) => {
             return await categoriesModel.getCategoryById(args.id);
+        },
+        getCategoryByName: async (_, args) => {
+            return await categoriesModel.getCategoryByName(args.name);
         }
     },
     Mutation: {

@@ -1,19 +1,20 @@
-const Product = require("./products.mongo");
-const Review = require("../reviews/reviews.mongo");
+const Models = require("./mongo.model");
 
-const categoriesModel = require("../categories/categories.model");
+const categoriesModel = require("./categories.model");
 
 const { getNextId } = require("../idindex/id.index");
-const validations = require("../services/validations");
-const functionTace = require("../services/function.trace");
+const validations = require("../utils/validations");
+const functionTace = require("../utils/function.trace");
 
 async function getAllProducts() {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        const result = await Product.find({}, {})
+
+        const result = await Models.Product.find({})
             .populate("categories")
             .populate("reviews")
             .exec();
+
         if (!result) {
             throw new Error(`Couldn\'t find Products...`);
         }
@@ -40,7 +41,7 @@ async function getProductById(id) {
             throw new Error(`Invalid input...`);
         }
         
-        const result = await Product.findOne({ id: id })
+        const result = await Models.Product.findOne({ id: id })
         .populate("categories")
         .populate("reviews")
             .exec();
@@ -70,7 +71,7 @@ async function getProductByName(name) {
             throw new Error(`Invalid input...`);
         }
         
-        const result = await Product.find({
+        const result = await Models.Product.find({
             name: new RegExp(name.split(" ").join("|"), "i"),
         })
             .populate("categories")
@@ -103,10 +104,7 @@ async function addNewReviewToProduct(data) {
             throw new Error(`Invalid input...`);
         }
         
-        const productExists = await Product.findOne(
-            { _id: data._id },
-            { id: 1, reviews: 1 },
-        );
+        const productExists = await Models.Product.findOne({ _id: data._id }, 'id reviews');
         
         if (!productExists) {
             throw new Error(
@@ -118,11 +116,13 @@ async function addNewReviewToProduct(data) {
             arr = [...productExists];
         }
         arr.push(data.objectId);
-        const result = await Product.updateOne(
+
+        const date = await validations.getDate();
+        const result = await Models.Product.updateOne(
             { _id: data._id },
             { 
                 reviews: arr, 
-                
+                updatedAt: date,
             },
             { upsert: true },
         );
@@ -199,18 +199,19 @@ async function addNewProduct(data) {
         let arr = [];
         await Promise.all(
             await data.categories.map(async (name) => {
-                let category = await categoriesModel.getCategoryByName(name);
-                if (!category.success) {
+                let category = await Models.Category.findOne({ name: name }, '_id');
+                if (!category) {
                     category = await categoriesModel.addNewCategory({ name });
                 }
-                arr.push(category.body[0]._id);
+                let pushId = (category._id) ? category._id : category.body[0]._id;
+                arr.push(pushId);
             }),
         );
 
         const idIndex = await getNextId("productId");
         const date = await validations.getDate();
         
-        const result = await Product({
+        const result = await Models.Product({
             id: idIndex,
             name: data.name,
             description: data.description,
@@ -246,7 +247,7 @@ async function updateProductById(data) {
             throw new Error(`Invalid input...`);
         }
         
-        let productExists = await Product.findOne({ id: data.id }, {})
+        let productExists = await Models.Product.findOne({ id: data.id }, {})
             .populate("categories")
             .exec();
 
@@ -270,13 +271,14 @@ async function updateProductById(data) {
             await Promise.all(
                 await data.categories.map(async (name) => {
                     if (!comparingArr.includes(name)) {
-                        let category = await categoriesModel.getCategoryByName(name);
-                        if (!category.success) {
+                        let category = await Models.Category.findOne({ name: name }, '_id');
+                        if (!category) {
                             category = await categoriesModel.addNewCategory({ name });
                         }
-                        arr.push(category.body[0]._id);
+                        let pushId = (category._id) ? category._id : category.body[0]._id;
+                        arr.push(pushId);
                     }
-                }),
+                })
             );
         }
 
@@ -291,7 +293,7 @@ async function updateProductById(data) {
             updatedAt: await validations.getDate(),
         };
 
-        const result = await Product.updateOne(
+        const result = await Models.Product.updateOne(
             { id: dataToUse.id },
             {
                 id: dataToUse.id,
@@ -381,10 +383,7 @@ async function deleteProductById(id) {
             throw new Error(`Invalid input...`);
         }
 
-        let fetchData = await Product.findOne(
-            { id: id },
-            { id: 1, reviews: 1 },
-        ).exec();
+        let fetchData = await Models.Product.findOne({ id: id }, 'id reviews').exec();
         if (!fetchData) {
             throw new Error(`Product with ID ${id} was not found...`);
         }
@@ -392,7 +391,7 @@ async function deleteProductById(id) {
         await Promise.all(
             await fetchData.reviews.map(async (reviewId) => {
                 if (reviewId) {
-                    const reviewResult = await Review.updateOne(
+                    const reviewResult = await Models.Review.updateOne(
                         { _id: reviewId },
                         { deleted: true, },
                         { upsert: true },
@@ -405,7 +404,7 @@ async function deleteProductById(id) {
             }),
         );
         
-        const result = await Product.updateOne(
+        const result = await Models.Product.updateOne(
             { id: id },
             { deleted: true },
             { upsert: true },
@@ -432,10 +431,7 @@ async function deleteProductById(id) {
 async function deleteCategoryFromProductById(categoryId) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        let categoryExistsInProduct = await Product.findOne(
-            { categories: categoryId },
-            { id: 1, categories: 1 },
-        );
+        let categoryExistsInProduct = await Models.Product.findOne({ categories: categoryId }, 'id categories');
         if (!categoryExistsInProduct) {
             throw new Error(
                 `Couldn\'t find Category associated with Product ID ${categoryExistsInProduct.id}...`,
@@ -452,7 +448,7 @@ async function deleteCategoryFromProductById(categoryId) {
 
         const date = await validations.getDate();
 
-        const result = await Product.updateOne(
+        const result = await Models.Product.updateOne(
             { categories: categoryId },
             {
                 categories: categoryExistsInProduct.categories,
@@ -479,8 +475,8 @@ async function deleteCategoryById(id) {
             throw new Error(`Invalid character found...`);
         }
 
-        const categoryExists = await categoriesModel.getCategoryById(id);
-        if (!categoryExists.success) {
+        const categoryExists = await Models.Category.findOne({ id: id }, '_id deleted');
+        if (!categoryExists) {
             throw new Error(`Couldn\'t find Category with ID ${id}`);
         }
         
@@ -488,13 +484,13 @@ async function deleteCategoryById(id) {
             throw new Error(`Category with ID ${id} already deleted...`);
         }
         
-        const productResult = await deleteCategoryFromProductById(categoryExists.body[0]._id);
+        const productResult = await deleteCategoryFromProductById(categoryExists._id);
         
         if (!productResult) {
             throw new Error(`Couldn\'t delete Category with ID ${id} from associated Product\'s...`);
         }
 
-        const result = await categoriesModel.deleteCategoryByIdUtil(id);
+        const result = await categoriesModel.deleteCategoryById(id);
         
         if (!result) {
             throw new Error(`Couldn\'t delete Category with ID ${id}...`);

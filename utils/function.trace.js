@@ -24,7 +24,7 @@ async function functionTraceEmitError(functionName, params, error) {
 }
 
 module.exports = {
-    functionTraceEmit,
     executionTime,
+    functionTraceEmit,
     functionTraceEmitError,
 }

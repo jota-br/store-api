@@ -3,7 +3,7 @@ const path = require('path');
 const https = require('https');
 
 const { app } = require('./app');
-const { mongoConnect } = require('./services/mongo');
+const { mongoConnect } = require('./utils/mongo.db');
 
 const { ApolloServer } = require('@apollo/server');
 const { expressMiddleware } = require('@apollo/server/express4');
