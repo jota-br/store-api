@@ -2,9 +2,9 @@ const Customer = require("./customers.mongo");
 const User = require("./users.mongo");
 
 const { getNextId } = require("../idindex/id.index");
-const validations = require("../utils/validations");
+const helpers = require("../utils/helpers");
 const security = require("../utils/security.password");
-const functionTace = require("../utils/function.trace");
+const functionTace = require("../utils/logger");
 
 async function getAllCustomers() {
     try {
@@ -13,7 +13,7 @@ async function getAllCustomers() {
         if (!result) {
             throw new Error(`Couldn\'t find Customers...`);
         }
-        
+
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('getAllCustomers', null, execTime);
 
@@ -23,24 +23,25 @@ async function getAllCustomers() {
             body: (Array.isArray(result) ? result : [result]),
         };
     } catch (err) {
-        functionTace.functionTraceEmitError('getAllCustomers', null, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('getAllCustomers', null, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
 }
 
 async function getCustomerById(id) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        let isValidString = await validations.validateString(id);
+        let isValidString = await helpers.validateString(id);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
         }
-        
+
         const result = await Customer.findOne({ id: id });
         if (!result) {
             throw new Error(`Couldn\'t return customer with ID ${id}`);
         }
-        
+
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('getCustomerById', id, execTime);
 
@@ -50,15 +51,16 @@ async function getCustomerById(id) {
             body: [result],
         };
     } catch (err) {
-        functionTace.functionTraceEmitError('getCustomerById', id, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('getCustomerById', id, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
 }
 
 async function getCustomerByEmail(email) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        let isValidEmail = await validations.validateEmail(email);
+        let isValidEmail = await helpers.validateEmail(email);
         if (!isValidEmail) {
             throw new Error(
                 `Email ${data.email} is invalid. Valid email format example@example.com....`,
@@ -79,41 +81,42 @@ async function getCustomerByEmail(email) {
             body: [result],
         };
     } catch (err) {
-        functionTace.functionTraceEmitError('getCustomerByEmail', email, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('getCustomerByEmail', email, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
 }
 
 async function updateCustomerById(data) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        
-        let isValidString = await validations.validateString(data);
+
+        let isValidString = await helpers.validateString(data);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
         }
-        
+
         const customerWithIdExists = await Customer.findOne({ id: data.id }, { id: 1, firstName: 1, lastName: 1, phone: 1, address: 1, email: 1 });
         if (!customerWithIdExists) {
             throw new Error(`Couldn\'t find Customer with ID ${data.id}...`);
         }
 
-        const userWithIdExists = await User.findOne({ email: customerWithIdExists.email}, { salt: 1, hash: 1 });
+        const userWithIdExists = await User.findOne({ email: customerWithIdExists.email }, { salt: 1, hash: 1 });
         if (!userWithIdExists) {
             throw new Error(`Couldn\'t find User with ID ${data.id}...`);
         }
-        
+
         const validCredential = await security.verifyPassword(
             data.password,
             userWithIdExists.salt,
             userWithIdExists.hash,
         );
-        
+
         if (!validCredential) {
             throw new Error(`Invalid credential...`);
         }
 
-        const date = await validations.getDate();
+        const date = await helpers.getDate();
         const dataToUse = {
             firstName: await (data.firstName) ? data.firstName : customerWithIdExists.firstName,
             lastName: await (data.lastName) ? data.lastName : customerWithIdExists.lastName,
@@ -137,7 +140,7 @@ async function updateCustomerById(data) {
         if (!result.acknowledged) {
             throw new Error(`Couldn\'t update Customer with ID ${data.id}...`);
         }
-        
+
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('updateCustomerById', data, execTime);
 
@@ -147,8 +150,9 @@ async function updateCustomerById(data) {
             body: [],
         };
     } catch (err) {
-        functionTace.functionTraceEmitError('updateCustomerById', data, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('updateCustomerById', data, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
 }
 
@@ -156,12 +160,12 @@ async function updateCustomerById(data) {
 async function addNewCustomer(data) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        let isValidString = await validations.validateString(data);
+        let isValidString = await helpers.validateString(data);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
         }
 
-        const isValidEmail = await validations.validateEmail(data.email);
+        const isValidEmail = await helpers.validateEmail(data.email);
         if (!isValidEmail) {
             throw new Error(
                 `Email ${data.email} is invalid. Valid email format example@example.com....`,
@@ -174,8 +178,8 @@ async function addNewCustomer(data) {
         }
 
         const idIndex = await getNextId("customerId");
-        const date = await validations.getDate();
-        
+        const date = await helpers.getDate();
+
         const result = await Customer({
             id: idIndex,
             firstName: data.firstName || null,
@@ -185,11 +189,11 @@ async function addNewCustomer(data) {
             address: data.address || null,
             createdAt: date,
         }).save();
-        
+
         if (!result) {
             throw new Error("Couldn\'t create new customer...");
         }
-        
+
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('addNewCustomer', data, execTime);
 
@@ -199,8 +203,9 @@ async function addNewCustomer(data) {
             body: [],
         };
     } catch (err) {
-        functionTace.functionTraceEmitError('addNewCustomer', data, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('addNewCustomer', data, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
 }
 
@@ -208,23 +213,24 @@ async function addNewCustomer(data) {
 async function deleteCustumerById(id) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        const date = await validations.getDate();
+        const date = await helpers.getDate();
         const result = await Customer.updateOne(
             { id: id },
-            { 
+            {
                 deleted: true,
                 updatedAt: date,
             },
             { upsert: true },
         );
-        
+
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('deleteCustomerById', id, execTime);
 
         return (result.acknowledged);
     } catch (err) {
-        functionTace.functionTraceEmitError('deleteCustomerById', id, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('deleteCustomerById', id, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
 }
 

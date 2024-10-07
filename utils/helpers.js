@@ -23,8 +23,13 @@ async function getDate() {
     return DateTime.now().setZone("UTC-3").toUnixInteger();
 }
 
+async function errorHandler(err) {
+    return { success: false, message: err.message, body: [] };
+}
+
 module.exports = {
     validateString,
     validateEmail,
+    errorHandler,
     getDate,
 }

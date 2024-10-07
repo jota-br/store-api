@@ -3,23 +3,23 @@ const Customer = require("./customers.mongo");
 const Product = require("./products.mongo");
 
 const { getNextId } = require("../idindex/id.index");
-const validations = require("../utils/validations");
-const functionTace = require("../utils/function.trace");
+const helpers = require("../utils/helpers");
+const functionTace = require("../utils/logger");
 
 async function getAllOrders() {
     try {
         const startTime = await functionTace.executionTime(false, false);
         const result = await Order.find({}, {})
-        .populate("customer")
+            .populate("customer")
             .populate({
                 path: 'products.product',
                 model: 'Product',
             })
             .exec();
-            if (!result) {
-                throw new Error(`Couldn\'t find Orders...`);
-            }
-            
+        if (!result) {
+            throw new Error(`Couldn\'t find Orders...`);
+        }
+
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('getAllOrders', null, execTime);
 
@@ -29,19 +29,20 @@ async function getAllOrders() {
             body: Array.isArray(result) ? result : [result],
         };
     } catch (err) {
-        functionTace.functionTraceEmitError('getAllOrders', null, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('getAllOrders', null, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
 }
 
 async function getOrderById(id) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        let isValidString = await validations.validateString(id);
+        let isValidString = await helpers.validateString(id);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
-        
+
         const result = await Order.findOne({ id: Number(id) })
             .populate("customer")
             .populate({
@@ -49,10 +50,10 @@ async function getOrderById(id) {
                 model: 'Product',
             })
             .exec();
-            if (!result) {
-                throw new Error(`Couldn\'t return Order with ID ${id}`);
+        if (!result) {
+            throw new Error(`Couldn\'t return Order with ID ${id}`);
         }
-        
+
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('getOrderById', id, execTime);
 
@@ -62,8 +63,9 @@ async function getOrderById(id) {
             body: [result],
         };
     } catch (err) {
-        functionTace.functionTraceEmitError('getOrderById', id, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('getOrderById', id, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
 }
 
@@ -74,12 +76,12 @@ async function addNewOrder(productsInput, customer) {
             order: productsInput,
             customer: customer,
         }
-        
-        let isValidString = await validations.validateString(validate);
+
+        let isValidString = await helpers.validateString(validate);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
-        
+
         const customerObject = await Customer.findOne({ id: customer }, { _id: 1 });
         if (!customerObject) {
             throw new Error("Ivalid Customer ID...");
@@ -88,7 +90,7 @@ async function addNewOrder(productsInput, customer) {
         let arrProductsId = [];
         let arrProductsQuantity = [];
         let arrProductCurrentStock = [];
-        
+
         const products = await Promise.all(productsInput.map(async (product) => {
             const productObject = await Product.findOne({ id: product.productId }, { _id: 1, stockQuantity: 1, name: 1, price: 1 });
             if (!productObject) {
@@ -102,8 +104,8 @@ async function addNewOrder(productsInput, customer) {
             arrProductsId.push(productObject._id);
             arrProductsQuantity.push(product.quantity);
             arrProductCurrentStock.push(productObject.stockQuantity);
-            
-            
+
+
             return {
                 product: productObject._id,
                 quantity: product.quantity,
@@ -114,7 +116,7 @@ async function addNewOrder(productsInput, customer) {
 
         await Promise.all(arrProductsId.map(async (productId) => {
             const index = arrProductsId.indexOf(productId);
-            const stockResult = await Product.updateOne (
+            const stockResult = await Product.updateOne(
                 { _id: productId },
                 { stockQuantity: (arrProductCurrentStock[index] - arrProductsQuantity[index]) }
             );
@@ -125,7 +127,7 @@ async function addNewOrder(productsInput, customer) {
         }));
 
         const idIndex = await getNextId("orderId");
-        const date = await validations.getDate();
+        const date = await helpers.getDate();
         const totalOrderAmount = products.reduce((sum, item) => sum + item.totalAmount, 0);
 
         const result = await Order({
@@ -139,7 +141,7 @@ async function addNewOrder(productsInput, customer) {
         if (!result) {
             throw new Error("Couldn\'t create new order...");
         }
-        
+
         await result.populate("customer");
         await result.populate({
             path: 'products.product',
@@ -147,7 +149,7 @@ async function addNewOrder(productsInput, customer) {
         });
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('addNewOrder', {productsInput, customer}, execTime);
+        functionTace.functionTraceEmit('addNewOrder', { productsInput, customer }, execTime);
 
         return {
             success: true,
@@ -155,39 +157,40 @@ async function addNewOrder(productsInput, customer) {
             body: [result],
         };
     } catch (err) {
-        functionTace.functionTraceEmitError('addNewOrder', { productsInput, customer }, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('addNewOrder', { productsInput, customer }, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
 }
 
 async function cancelOrderById(id) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        let isValidString = await validations.validateString(id);
+        let isValidString = await helpers.validateString(id);
         if (!isValidString) {
             throw new Error(`Invalid character found...`);
         }
-        
+
         const orderExists = Order.findOne({ id: id }, { id: 1 });
 
         if (!orderExists) {
             throw new Error(`Couldn\'t find Order with ID ${id}...`);
         }
-        
-        const date = await validations.getDate();
+
+        const date = await helpers.getDate();
         const result = await Order.updateOne(
             { id: id },
-            { 
+            {
                 canceled: true,
                 updatedAt: date,
             },
             { upsert: true },
         );
-        
+
         if (!result.acknowledged) {
             throw new Error(`Couldn\'t delete Order with ID ${id}...`);
         }
-        
+
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('cancelOrderById', id, execTime);
 
@@ -197,8 +200,9 @@ async function cancelOrderById(id) {
             body: [],
         };
     } catch (err) {
-        functionTace.functionTraceEmitError('cancelOrderById', id, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('cancelOrderById', id, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
 }
 

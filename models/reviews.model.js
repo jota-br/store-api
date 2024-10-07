@@ -6,21 +6,21 @@ const customersModel = require("./customers.model");
 const productsModel = require("./products.model");
 
 const { getNextId } = require("../idindex/id.index");
-const validations = require("../utils/validations");
-const functionTace = require("../utils/function.trace");
+const helpers = require("../utils/helpers");
+const functionTace = require("../utils/logger");
 
 async function getAllReviews() {
     try {
         const startTime = await functionTace.executionTime(false, false);
         const result = await Review.find({}, {})
-        .populate("customer")
-        .populate("product")
-        .exec();
-        
+            .populate("customer")
+            .populate("product")
+            .exec();
+
         if (!result) {
             throw new Error(`Couldn\'t find Reviews...`);
         }
-        
+
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('getAllReviews', null, execTime);
 
@@ -30,28 +30,29 @@ async function getAllReviews() {
             body: Array.isArray(result) ? result : [result],
         };
     } catch (err) {
-        functionTace.functionTraceEmitError('getAllReviews', null, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('getAllReviews', null, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
 }
 
 async function getReviewById(id) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        let isValidString = await validations.validateString(id);
+        let isValidString = await helpers.validateString(id);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
         }
 
         const result = await Review.findOne({ id: Number(id) })
-        .populate("customer")
-        .populate("product")
-        .exec();
+            .populate("customer")
+            .populate("product")
+            .exec();
 
         if (!result) {
             throw new Error(`Couldn\'t return Review with ID ${id}`);
         }
-        
+
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('getReviewById', id, execTime);
 
@@ -61,25 +62,26 @@ async function getReviewById(id) {
             body: [result],
         };
     } catch (err) {
-        functionTace.functionTraceEmitError('getReviewById', id, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('getReviewById', id, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
 }
 
 async function addNewReview(data) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        let isValidString = await validations.validateString(data);
+        let isValidString = await helpers.validateString(data);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
         }
-        
+
         // get customer ObjectId
         const customerObjectId = await Customer.findOne({ id: data.customer }, '_id');
         if (!customerObjectId) {
             throw new Error("Invalid Customer ID...");
         }
-        
+
         // get customer ObjectId
         const productObjectId = await Product.findOne({ id: data.product }, '_id');
         if (!productObjectId) {
@@ -87,8 +89,8 @@ async function addNewReview(data) {
         }
 
         idIndex = await getNextId("reviewId");
-        date = await validations.getDate();
-        
+        date = await helpers.getDate();
+
         const result = await Review(
             {
                 id: idIndex,
@@ -99,11 +101,11 @@ async function addNewReview(data) {
                 createdAt: date,
             },
         ).save();
-        
+
         if (!result) {
             throw new Error("Couldn't create new review...");
         }
-        
+
         const reviewObjectId = await Review.findOne({ id: idIndex }, '_id').exec();
         let ProductWithReview = {
             _id: productObjectId._id,
@@ -112,12 +114,12 @@ async function addNewReview(data) {
         if (!reviewObjectId) {
             throw new Error(`Couldn\'t find Review with ID ${id}`);
         }
-        
+
         const productResult = await productsModel.addNewReviewToProduct(ProductWithReview);
-            if (!productResult) {
-                throw new Error(`Couldn\'t associate Review with Product...`);
-            }
-            
+        if (!productResult) {
+            throw new Error(`Couldn\'t associate Review with Product...`);
+        }
+
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('addNewReview', data, execTime);
 
@@ -127,15 +129,16 @@ async function addNewReview(data) {
             body: [],
         };
     } catch (err) {
-        functionTace.functionTraceEmitError('addNewReview', data, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('addNewReview', data, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
 }
 
 async function updateReviewById(data) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        let isValidString = await validations.validateString(data);
+        let isValidString = await helpers.validateString(data);
         if (!isValidString) {
             throw new Error(`Invalid input...`);
         }
@@ -144,8 +147,8 @@ async function updateReviewById(data) {
         if (!reviewExists) {
             throw new Error(`Couldn\'t find Review with ID ${data.id}`);
         }
-        
-        const date = await validations.getDate();
+
+        const date = await helpers.getDate();
         const result = await Review.updateOne(
             { id: data.id },
             {
@@ -155,11 +158,11 @@ async function updateReviewById(data) {
             },
             { upsert: true },
         );
-        
+
         if (!result.acknowledged) {
             throw new Error(`Couldn\'t update Review with ID ${data.id}`);
         }
-        
+
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('updateReviewById', data, execTime);
 
@@ -168,12 +171,13 @@ async function updateReviewById(data) {
             message: `Review was updated...`,
             body: [],
         };
-        
+
     } catch (err) {
-        functionTace.functionTraceEmitError('updateReviewById', data, err.message);
-        return { success: false, message: err.message, body: [] };
+        await functionTace.functionTraceEmitError('updateReviewById', data, err.message);
+        const returnError = await helpers.errorHandler(err);
+        return returnError;
     }
-} 
+}
 
 module.exports = {
     getAllReviews,
