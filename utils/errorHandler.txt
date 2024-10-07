@@ -1,5 +1,0 @@
-// errorHandler.js
-function handleError(error) {
-    return { success: false, message: error.message, body: [] };
-}
-module.exports = { handleError };
