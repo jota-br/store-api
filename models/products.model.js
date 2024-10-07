@@ -1,4 +1,6 @@
-const Models = require("./mongo.model");
+const Product = require("./products.mongo");
+const Category = require("./categories.mongo");
+const Review = require("./reviews.mongo");
 
 const categoriesModel = require("./categories.model");
 
@@ -10,7 +12,7 @@ async function getAllProducts() {
     try {
         const startTime = await functionTace.executionTime(false, false);
 
-        const result = await Models.Product.find({})
+        const result = await Product.find({})
             .populate("categories")
             .populate("reviews")
             .exec();
@@ -41,7 +43,7 @@ async function getProductById(id) {
             throw new Error(`Invalid input...`);
         }
         
-        const result = await Models.Product.findOne({ id: id })
+        const result = await Product.findOne({ id: id })
         .populate("categories")
         .populate("reviews")
             .exec();
@@ -71,7 +73,7 @@ async function getProductByName(name) {
             throw new Error(`Invalid input...`);
         }
         
-        const result = await Models.Product.find({
+        const result = await Product.find({
             name: new RegExp(name.split(" ").join("|"), "i"),
         })
             .populate("categories")
@@ -104,7 +106,7 @@ async function addNewReviewToProduct(data) {
             throw new Error(`Invalid input...`);
         }
         
-        const productExists = await Models.Product.findOne({ _id: data._id }, 'id reviews');
+        const productExists = await Product.findOne({ _id: data._id }, 'id reviews');
         
         if (!productExists) {
             throw new Error(
@@ -118,7 +120,7 @@ async function addNewReviewToProduct(data) {
         arr.push(data.objectId);
 
         const date = await validations.getDate();
-        const result = await Models.Product.updateOne(
+        const result = await Product.updateOne(
             { _id: data._id },
             { 
                 reviews: arr, 
@@ -156,11 +158,12 @@ async function addNewReviewToProduct(data) {
 //         let arr = [];
 //         await Promise.all(
 //             await data.categories.map(async (name) => {
-//                 let category = await categoriesModel.getCategoryByName(name);
+//                 let category = await Category.findOne({ name: name }, '_id');
 //                 if (!category) {
 //                     category = await categoriesModel.addNewCategory({ name });
 //                 }
-//                 arr.push(category._id);
+//                 let pushId = (category._id) ? category._id : category.body[0]._id;
+                	arr.push(pushId);
 //             }),
 //         );
 
@@ -199,7 +202,7 @@ async function addNewProduct(data) {
         let arr = [];
         await Promise.all(
             await data.categories.map(async (name) => {
-                let category = await Models.Category.findOne({ name: name }, '_id');
+                let category = await Category.findOne({ name: name }, '_id');
                 if (!category) {
                     category = await categoriesModel.addNewCategory({ name });
                 }
@@ -211,7 +214,7 @@ async function addNewProduct(data) {
         const idIndex = await getNextId("productId");
         const date = await validations.getDate();
         
-        const result = await Models.Product({
+        const result = await Product({
             id: idIndex,
             name: data.name,
             description: data.description,
@@ -247,7 +250,7 @@ async function updateProductById(data) {
             throw new Error(`Invalid input...`);
         }
         
-        let productExists = await Models.Product.findOne({ id: data.id }, {})
+        let productExists = await Product.findOne({ id: data.id }, {})
             .populate("categories")
             .exec();
 
@@ -271,7 +274,7 @@ async function updateProductById(data) {
             await Promise.all(
                 await data.categories.map(async (name) => {
                     if (!comparingArr.includes(name)) {
-                        let category = await Models.Category.findOne({ name: name }, '_id');
+                        let category = await Category.findOne({ name: name }, '_id');
                         if (!category) {
                             category = await categoriesModel.addNewCategory({ name });
                         }
@@ -293,7 +296,7 @@ async function updateProductById(data) {
             updatedAt: await validations.getDate(),
         };
 
-        const result = await Models.Product.updateOne(
+        const result = await Product.updateOne(
             { id: dataToUse.id },
             {
                 id: dataToUse.id,
@@ -383,7 +386,7 @@ async function deleteProductById(id) {
             throw new Error(`Invalid input...`);
         }
 
-        let fetchData = await Models.Product.findOne({ id: id }, 'id reviews').exec();
+        let fetchData = await Product.findOne({ id: id }, 'id reviews').exec();
         if (!fetchData) {
             throw new Error(`Product with ID ${id} was not found...`);
         }
@@ -391,7 +394,7 @@ async function deleteProductById(id) {
         await Promise.all(
             await fetchData.reviews.map(async (reviewId) => {
                 if (reviewId) {
-                    const reviewResult = await Models.Review.updateOne(
+                    const reviewResult = await Review.updateOne(
                         { _id: reviewId },
                         { deleted: true, },
                         { upsert: true },
@@ -404,7 +407,7 @@ async function deleteProductById(id) {
             }),
         );
         
-        const result = await Models.Product.updateOne(
+        const result = await Product.updateOne(
             { id: id },
             { deleted: true },
             { upsert: true },
@@ -431,7 +434,7 @@ async function deleteProductById(id) {
 async function deleteCategoryFromProductById(categoryId) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        let categoryExistsInProduct = await Models.Product.findOne({ categories: categoryId }, 'id categories');
+        let categoryExistsInProduct = await Product.findOne({ categories: categoryId }, 'id categories');
         if (!categoryExistsInProduct) {
             throw new Error(
                 `Couldn\'t find Category associated with Product ID ${categoryExistsInProduct.id}...`,
@@ -448,7 +451,7 @@ async function deleteCategoryFromProductById(categoryId) {
 
         const date = await validations.getDate();
 
-        const result = await Models.Product.updateOne(
+        const result = await Product.updateOne(
             { categories: categoryId },
             {
                 categories: categoryExistsInProduct.categories,
@@ -475,7 +478,7 @@ async function deleteCategoryById(id) {
             throw new Error(`Invalid character found...`);
         }
 
-        const categoryExists = await Models.Category.findOne({ id: id }, '_id deleted');
+        const categoryExists = await Category.findOne({ id: id }, '_id deleted');
         if (!categoryExists) {
             throw new Error(`Couldn\'t find Category with ID ${id}`);
         }

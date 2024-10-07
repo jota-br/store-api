@@ -1,4 +1,4 @@
-const Models = require("./mongo.model");
+const Category = require("./categories.mongo");
 
 const { getNextId } = require("../idindex/id.index");
 const validations = require("../utils/validations");
@@ -7,7 +7,7 @@ const functionTace = require("../utils/function.trace");
 async function getAllCategories() {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        const result = await Models.Category.find({}, {}).exec();
+        const result = await Category.find({}, {}).exec();
         if (!result) {
             throw new Error(`Couldn\'t find Categories...`);
         }
@@ -34,7 +34,7 @@ async function getCategoryById(id) {
             throw new Error(`Invalid input...`);
         }
 
-        const result = await Models.Category.findOne({ id: Number(id) });
+        const result = await Category.findOne({ id: Number(id) });
         if (!result) {
             throw new Error(`Couldn\'t return category with ID ${id}`);
         }
@@ -61,7 +61,7 @@ async function getCategoryByName(name) {
             throw new Error(`Invalid character found...`);
         }
 
-        const result = await Models.Category.findOne(
+        const result = await Category.findOne(
             { name: new RegExp(`${name}`, "i") }
         ).exec();
         if (!result) {
@@ -89,7 +89,7 @@ async function addNewCategory(data) {
             throw new Error(`Invalid input...`);
         }
         
-        let category = await Models.Category.findOne({ name: data.name }, 'name');
+        let category = await Category.findOne({ name: data.name }, 'name');
         if (category) {
             throw new Error(`Category with NAME ${data.name} already exists...`,);
         }
@@ -97,7 +97,7 @@ async function addNewCategory(data) {
         const idIndex = await getNextId("categoryId");
         const date = await validations.getDate();
         
-        const result = await Models.Category({
+        const result = await Category({
             id: idIndex,
             name: data.name,
             description: data.description || null,
@@ -130,7 +130,7 @@ async function updateCategoryById(data) {
             throw new Error(`Invalid character found...`);
         }
 
-        const categoryExists = await Models.Category.findOne({ id: data.id }, 'name');
+        const categoryExists = await Category.findOne({ id: data.id }, 'name');
         if (!categoryExists) {
             throw new Error(`Couldn\'t find Category with ID ${id}`);
         }
@@ -142,7 +142,7 @@ async function updateCategoryById(data) {
 
         const date = await validations.getDate();
         
-        const result = await Models.Category.updateOne(
+        const result = await Category.updateOne(
             { id: data.id },
             {
                 name: dataToUse.name,
@@ -175,7 +175,7 @@ async function updateCategoryById(data) {
 async function deleteCategoryById(id) {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        const result = await Models.Category.deleteOne({ id: id });
+        const result = await Category.deleteOne({ id: id });
 
         const execTime = await functionTace.executionTime(startTime, false);
         functionTace.functionTraceEmit('deleteCategoryByIdUtil', id, execTime);

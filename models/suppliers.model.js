@@ -1,4 +1,4 @@
-const Models = require("./mongo.model");
+const Supplier = require("./suppliers.mongo");
 
 const { getNextId } = require("../idindex/id.index");
 const validations = require("../utils/validations");
@@ -7,7 +7,7 @@ const functionTace = require("../utils/function.trace");
 async function getAllSuppliers() {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        const result = await Models.Supplier.find({}, {}).exec();
+        const result = await Supplier.find({}, {}).exec();
         if (!result) {
             throw new Error(`Couldn\'t find Suppliers...`);
         }
@@ -34,7 +34,7 @@ async function getSupplierById(id) {
             throw new Error(`Invalid input...`);
         }
         
-        const result = await Models.Supplier.findOne({ id: id }).exec();
+        const result = await Supplier.findOne({ id: id }).exec();
         if (!result) {
             throw new Error(`Couldn\'t find Supplier with ID ${id}`);
         }
@@ -61,7 +61,7 @@ async function getSupplierByName(name) {
             throw new Error(`Invalid input...`);
         }
 
-        const result = await Models.Supplier.find({
+        const result = await Supplier.find({
             supplierName: new RegExp(name.split(" ").join("|"), "i"),
         }).exec();
         
@@ -91,7 +91,7 @@ async function addNewSupplier(data) {
             throw new Error(`Invalid input...`);
         }
         
-        const supplierExists = await Models.Supplier.findOne({ name: new RegExp(`${data.name}`, "i") }, 'id');
+        const supplierExists = await Supplier.findOne({ name: new RegExp(`${data.name}`, "i") }, 'id');
         
         if (supplierExists) {
             throw new Error("Supplier with NAME ${data.name} already exists...");
@@ -100,7 +100,7 @@ async function addNewSupplier(data) {
         const idIndex = await getNextId("supplierId");
         const date = await validations.getDate();
         
-        const result = await Models.Supplier({
+        const result = await Supplier({
             id: idIndex,
             supplierName: data.supplierName,
             contactNames: data.contactNames,
@@ -135,13 +135,13 @@ async function deleteSupplierById(id) {
             throw new Error(`Invalid input...`);
         }
 
-        const supplierExists = await Models.Supplier.findOne({ id: id }, 'id');
+        const supplierExists = await Supplier.findOne({ id: id }, 'id');
         if (!supplierExists) {
             throw new Error(`Couldn\'t find Supplier with ID ${id}`);
         }
         
         const date = await validations.getDate();
-        const result = await Models.Supplier.updateOne(
+        const result = await Supplier.updateOne(
             { id: id },
             { deleted: true, updatedAt: date },
             { upsert: true },

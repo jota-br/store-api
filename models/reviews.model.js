@@ -1,4 +1,6 @@
-const Models = require("./mongo.model");
+const Review = require("./reviews.mongo");
+const Customer = require("./customers.mongo");
+const Product = require("./products.mongo");
 
 const customersModel = require("./customers.model");
 const productsModel = require("./products.model");
@@ -10,7 +12,7 @@ const functionTace = require("../utils/function.trace");
 async function getAllReviews() {
     try {
         const startTime = await functionTace.executionTime(false, false);
-        const result = await Models.Review.find({}, {})
+        const result = await Review.find({}, {})
         .populate("customer")
         .populate("product")
         .exec();
@@ -41,7 +43,7 @@ async function getReviewById(id) {
             throw new Error(`Invalid input...`);
         }
 
-        const result = await Models.Review.findOne({ id: Number(id) })
+        const result = await Review.findOne({ id: Number(id) })
         .populate("customer")
         .populate("product")
         .exec();
@@ -73,13 +75,13 @@ async function addNewReview(data) {
         }
         
         // get customer ObjectId
-        const customerObjectId = await Models.Customer.findOne({ id: data.customer }, '_id');
+        const customerObjectId = await Customer.findOne({ id: data.customer }, '_id');
         if (!customerObjectId) {
             throw new Error("Invalid Customer ID...");
         }
         
         // get customer ObjectId
-        const productObjectId = await Models.Product.findOne({ id: data.product }, '_id');
+        const productObjectId = await Product.findOne({ id: data.product }, '_id');
         if (!productObjectId) {
             throw new Error("Invalid Product ID...");
         }
@@ -87,7 +89,7 @@ async function addNewReview(data) {
         idIndex = await getNextId("reviewId");
         date = await validations.getDate();
         
-        const result = await Models.Review(
+        const result = await Review(
             {
                 id: idIndex,
                 comment: data.comment,
@@ -102,7 +104,7 @@ async function addNewReview(data) {
             throw new Error("Couldn't create new review...");
         }
         
-        const reviewObjectId = await Models.Review.findOne({ id: idIndex }, '_id').exec();
+        const reviewObjectId = await Review.findOne({ id: idIndex }, '_id').exec();
         let ProductWithReview = {
             _id: productObjectId._id,
             objectId: reviewObjectId._id,
@@ -138,7 +140,7 @@ async function updateReviewById(data) {
             throw new Error(`Invalid input...`);
         }
 
-        const reviewExists = await Models.Review.findOne({ id: data.id }, 'rating comment');
+        const reviewExists = await Review.findOne({ id: data.id }, 'rating comment');
         if (!reviewExists) {
             throw new Error(`Couldn\'t find Review with ID ${data.id}`);
         }
