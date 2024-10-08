@@ -1,6 +1,7 @@
 const cors = require('cors');
 const express = require('express');
-const cookieSession = require('cookie-session');
+
+const authRouter = require('./controllers/auth.routes');
 
 require('dotenv').config();
 
@@ -15,13 +16,9 @@ var corsOptions = {
 }
 let i = 0;
 const app = express();
-// app.use(cors());
 app.use(express.json());
-app.use(cookieSession({
-    name: 'session',
-    maxAge: 24 * 60 * 60 * 1000,
-    keys: [config.COOKIE_KEY_1, config.COOKIE_KEY_2],
-}));
+
+app.use('/auth', authRouter);
 
 module.exports = { 
     app,
