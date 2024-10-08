@@ -15,7 +15,7 @@ async function getAllCustomers() {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getAllCustomers', null, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -23,7 +23,6 @@ async function getAllCustomers() {
             body: (Array.isArray(result) ? result : [result]),
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getAllCustomers', null, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -43,7 +42,7 @@ async function getCustomerById(id) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getCustomerById', id, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -51,7 +50,6 @@ async function getCustomerById(id) {
             body: [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getCustomerById', id, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -73,7 +71,7 @@ async function getCustomerByEmail(email) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getCustomerByEmail', email, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -81,7 +79,6 @@ async function getCustomerByEmail(email) {
             body: [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getCustomerByEmail', email, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -142,7 +139,7 @@ async function updateCustomerById(data) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('updateCustomerById', data, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -150,7 +147,6 @@ async function updateCustomerById(data) {
             body: [],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('updateCustomerById', data, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -195,7 +191,7 @@ async function addNewCustomer(data) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('addNewCustomer', data, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -203,7 +199,6 @@ async function addNewCustomer(data) {
             body: [],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('addNewCustomer', data, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -224,11 +219,10 @@ async function deleteCustumerById(id) {
         );
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('deleteCustomerById', id, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return (result.acknowledged);
     } catch (err) {
-        await functionTace.functionTraceEmitError('deleteCustomerById', id, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }

@@ -22,7 +22,7 @@ async function getAllReviews() {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getAllReviews', null, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -30,7 +30,6 @@ async function getAllReviews() {
             body: Array.isArray(result) ? result : [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getAllReviews', null, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -54,7 +53,7 @@ async function getReviewById(id) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getReviewById', id, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -62,7 +61,6 @@ async function getReviewById(id) {
             body: [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getReviewById', id, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -121,7 +119,7 @@ async function addNewReview(data) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('addNewReview', data, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -129,7 +127,6 @@ async function addNewReview(data) {
             body: [],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('addNewReview', data, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -164,7 +161,7 @@ async function updateReviewById(data) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('updateReviewById', data, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -173,7 +170,6 @@ async function updateReviewById(data) {
         };
 
     } catch (err) {
-        await functionTace.functionTraceEmitError('updateReviewById', data, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }

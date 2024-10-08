@@ -21,7 +21,7 @@ async function getAllOrders() {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getAllOrders', null, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -29,7 +29,6 @@ async function getAllOrders() {
             body: Array.isArray(result) ? result : [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getAllOrders', null, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -55,7 +54,7 @@ async function getOrderById(id) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getOrderById', id, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -63,7 +62,6 @@ async function getOrderById(id) {
             body: [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getOrderById', id, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -149,7 +147,7 @@ async function addNewOrder(productsInput, customer) {
         });
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('addNewOrder', { productsInput, customer }, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -157,7 +155,6 @@ async function addNewOrder(productsInput, customer) {
             body: [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('addNewOrder', { productsInput, customer }, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -192,7 +189,7 @@ async function cancelOrderById(id) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('cancelOrderById', id, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -200,7 +197,6 @@ async function cancelOrderById(id) {
             body: [],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('cancelOrderById', id, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }

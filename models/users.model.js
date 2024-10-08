@@ -19,7 +19,7 @@ async function getAllUsers() {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getAllUsers', null, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -27,7 +27,6 @@ async function getAllUsers() {
             body: (Array.isArray(result) ? result : [result]),
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getAllUsers', null, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -51,7 +50,7 @@ async function getUserById(id) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getUserById', id, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -59,7 +58,6 @@ async function getUserById(id) {
             body: [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getUserById', id, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -81,7 +79,7 @@ async function getUserByEmail(email) {
         await result.populate("customer");
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getUserByEmail', email, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -89,7 +87,6 @@ async function getUserByEmail(email) {
             body: [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getUserByEmail', email, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -147,7 +144,7 @@ async function addNewUser(data) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('addNewUser', data, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -155,7 +152,6 @@ async function addNewUser(data) {
             body: [],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('addNewUser', data, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -205,7 +201,7 @@ async function updateUserPasswordById(data) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('updateUserPasswordById', data, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -213,7 +209,6 @@ async function updateUserPasswordById(data) {
             body: [],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('updateUserPasswordById', data, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -269,7 +264,7 @@ async function deleteUserById(data) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('deleteUserById', data, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -277,7 +272,6 @@ async function deleteUserById(data) {
             body: [],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('deleteUserById', data, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }

@@ -22,7 +22,7 @@ async function getAllProducts() {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getAllProducts', null, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -30,7 +30,6 @@ async function getAllProducts() {
             body: Array.isArray(result) ? result : [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getAllProducts', null, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -53,7 +52,7 @@ async function getProductById(id) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getProductById', id, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -61,7 +60,6 @@ async function getProductById(id) {
             body: [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getProductById', id, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -86,7 +84,7 @@ async function getProductByName(name) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getProductByName', name, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -94,7 +92,6 @@ async function getProductByName(name) {
             body: Array.isArray(result) ? result : [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getProductByName', name, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -133,11 +130,10 @@ async function addNewReviewToProduct(data) {
         );
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getProductByName', data, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return (result.acknowledged);
     } catch (err) {
-        await functionTace.functionTraceEmitError('getProductByName', data, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -181,7 +177,7 @@ async function addNewProduct(data) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('addNewProduct', data, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -189,7 +185,6 @@ async function addNewProduct(data) {
             body: [],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('addNewProduct', data, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -269,7 +264,7 @@ async function updateProductById(data) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('updateProductById', data, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -277,7 +272,6 @@ async function updateProductById(data) {
             body: [],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('updateProductById', data, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -322,7 +316,7 @@ async function deleteProductById(id) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('deleteProductById', null, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -330,7 +324,6 @@ async function deleteProductById(id) {
             body: [],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('deleteProductById', null, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -367,11 +360,10 @@ async function deleteCategoryFromProductById(categoryId) {
         );
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('deleteCategoryFromProductById', id, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return (result.acknowledged);
     } catch (err) {
-        await functionTace.functionTraceEmitError('deleteCategoryFromProductById', id, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -407,7 +399,7 @@ async function deleteCategoryById(id) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('deleteCategoryById', id, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -416,7 +408,6 @@ async function deleteCategoryById(id) {
         };
 
     } catch (err) {
-        await functionTace.functionTraceEmitError('deleteCategoryById', id, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }

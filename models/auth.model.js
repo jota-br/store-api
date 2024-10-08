@@ -29,7 +29,7 @@ async function authLogin(data) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('authLogin', null, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -37,7 +37,6 @@ async function authLogin(data) {
             body: [{ token: token }],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('authLogin', null, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }

@@ -1,4 +1,5 @@
 const { DateTime } = require('luxon');
+const logger = require('./logger');
 
 async function validateString(data) {
     return new Promise((resolve) => {
@@ -24,6 +25,7 @@ async function getDate() {
 }
 
 async function errorHandler(err) {
+    await logger.functionTraceEmitError(err);
     return { success: false, message: err.message, body: [] };
 }
 

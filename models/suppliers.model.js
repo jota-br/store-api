@@ -13,7 +13,7 @@ async function getAllSuppliers() {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getAllSuppliers', null, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -21,7 +21,6 @@ async function getAllSuppliers() {
             body: Array.isArray(result) ? result : [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getAllSuppliers', null, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -41,7 +40,7 @@ async function getSupplierById(id) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getSupplierById', id, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -49,7 +48,6 @@ async function getSupplierById(id) {
             body: [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getSupplierById', id, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -72,7 +70,7 @@ async function getSupplierByName(name) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getSupplierByName', name, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -80,7 +78,6 @@ async function getSupplierByName(name) {
             body: Array.isArray(result) ? result : [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getSupplierByName', name, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -117,7 +114,7 @@ async function addNewSupplier(data) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('addNewSupplier', data, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -125,7 +122,6 @@ async function addNewSupplier(data) {
             body: [],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('addNewSupplier', data, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -156,7 +152,7 @@ async function deleteSupplierById(id) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('deleteSupplierById', id, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -164,7 +160,6 @@ async function deleteSupplierById(id) {
             body: [],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('deleteSupplierById', id, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }

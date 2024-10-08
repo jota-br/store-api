@@ -13,7 +13,7 @@ async function getAllCategories() {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getAllCategories', null, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -21,7 +21,6 @@ async function getAllCategories() {
             body: Array.isArray(result) ? result : [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getAllCategories', null, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -41,7 +40,7 @@ async function getCategoryById(id) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getCategoryById', id, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -49,7 +48,6 @@ async function getCategoryById(id) {
             body: [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getCategoryById', id, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -71,14 +69,13 @@ async function getCategoryByName(name) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('getCategoryByName', name, execTime);
+        functionTace.functionTraceEmit(execTime);
         return {
             success: true,
             message: `Category with NAME ${name} found...`,
             body: [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('getCategoryByName', name, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -112,7 +109,7 @@ async function addNewCategory(data) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('addNewCategory', data, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -120,7 +117,6 @@ async function addNewCategory(data) {
             body: [result],
         };
     } catch (err) {
-        await functionTace.functionTraceEmitError('addNewCategory', data, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -161,7 +157,7 @@ async function updateCategoryById(data) {
         }
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('updateCategoryById', data, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return {
             success: true,
@@ -170,7 +166,6 @@ async function updateCategoryById(data) {
         };
 
     } catch (err) {
-        await functionTace.functionTraceEmitError('updateCategoryById', data, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }
@@ -183,11 +178,10 @@ async function deleteCategoryById(id) {
         const result = await Category.deleteOne({ id: id });
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('deleteCategoryByIdUtil', id, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return (result.deletedCount === 1);
     } catch (err) {
-        await functionTace.functionTraceEmitError('deleteCategoryByIdUtil', id, err.message);
         const returnError = await helpers.errorHandler(err);
         return returnError;
     }

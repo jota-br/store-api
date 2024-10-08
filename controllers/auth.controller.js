@@ -16,11 +16,10 @@ async function httpAuthLogin(req, res) {
         req.session.token = result.body[0].token;
 
         const execTime = await functionTace.executionTime(startTime, false);
-        functionTace.functionTraceEmit('httpAuthLogin', null, execTime);
+        functionTace.functionTraceEmit(execTime);
 
         return res.status(200).json({ success: true, message: 'Authenticated', body: [{ token: req.session.token } ]});
     } catch (err) {
-        await functionTace.functionTraceEmitError('httpAuthLogin', null, err.message);
         const returnError = await helpers.errorHandler(err);
         return res.status(400).json(returnError);
     }
